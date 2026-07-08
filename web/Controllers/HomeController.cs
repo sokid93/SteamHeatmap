@@ -1,31 +1,20 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using SteamHeatmap.Web.Models;
+using SteamHeatmap.Web.Domain;
 
 namespace SteamHeatmap.Web.Controllers;
 
 public class HomeController : Controller
 {
-    private readonly ILogger<HomeController> _logger;
+    private readonly RegionMapViewModelBuilder _viewModelBuilder;
 
-    public HomeController(ILogger<HomeController> logger)
+    public HomeController(RegionMapViewModelBuilder viewModelBuilder)
     {
-        _logger = logger;
+        _viewModelBuilder = viewModelBuilder;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        return View();
-    }
-
-    public IActionResult Privacy()
-    {
-        return View();
-    }
-
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
-    {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        var viewModel = await _viewModelBuilder.Build();
+        return View(viewModel);
     }
 }

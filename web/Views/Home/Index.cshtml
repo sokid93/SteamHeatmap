@@ -1,8 +1,72 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@model SteamHeatmap.Web.Domain.RegionMapViewModel
+@{
+    ViewData["Title"] = "Steam Regional Popularity Heatmap";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<h1>Steam Regional Popularity Heatmap</h1>
+
+<div id="map"></div>
+
+@foreach (var region in Model.Regions)
+{
+    <section class="region">
+        <h2>
+            @region.DisplayName
+            @if (region.Blended)
+            {
+                <small>(blended: @string.Join(", ", region.MemberCountries))</small>
+            }
+        </h2>
+        <ol>
+            @foreach (var game in region.Games)
+            {
+                <li>@game.Name — concentration @game.Concentration.ToString("0.000")</li>
+            }
+        </ol>
+    </section>
+}
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script>
+        // Walking skeleton: one block per member country of each region,
+        // shaded by the region's top concentration. Real TopoJSON world
+        // boundaries arrive with the full-map issue.
+        const regions = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+            Model.Regions.Select(r => new
+            {
+                code = r.Code,
+                displayName = r.DisplayName,
+                countries = r.MemberCountries,
+                topGame = r.Games.FirstOrDefault()?.Name,
+                concentration = r.Games.FirstOrDefault()?.Concentration ?? 0
+            })));
+
+        const svg = d3.select("#map").append("svg")
+            .attr("width", 640).attr("height", 160);
+
+        const color = d3.scaleSequential(d3.interpolateYlOrRd).domain([0, 2]);
+
+        regions.forEach(region => {
+            const group = svg.selectAll(`g.${region.code}`)
+                .data(region.countries)
+                .join("g");
+
+            group.append("rect")
+                .attr("x", (_, i) => 10 + i * 150)
+                .attr("y", 30)
+                .attr("width", 140)
+                .attr("height", 80)
+                .attr("fill", color(region.concentration))
+                .attr("stroke", "#333")
+                .append("title")
+                .text(`${region.displayName} — ${region.topGame}`);
+
+            group.append("text")
+                .attr("x", (_, i) => 80 + i * 150)
+                .attr("y", 75)
+                .attr("text-anchor", "middle")
+                .text(country => country);
+        });
+    </script>
+}
