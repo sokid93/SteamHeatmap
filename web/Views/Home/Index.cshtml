@@ -20,7 +20,7 @@
         <ol>
             @foreach (var game in region.Games)
             {
-                <li>@game.Name — concentration @game.Concentration.ToString("0.000")</li>
+                <li>@game.Name — concentration @game.Concentration.ToString("0.000", System.Globalization.CultureInfo.InvariantCulture)</li>
             }
         </ol>
     </section>
