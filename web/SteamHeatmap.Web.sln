@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteamHeatmap.Web", "SteamHeatmap.Web.csproj", "{D481FC21-B5C6-49A2-9737-4A88B538DB63}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteamHeatmap.Web.Tests", "tests\SteamHeatmap.Web.Tests.csproj", "{E5E0899E-47E3-4512-97D8-9CF64506676F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D481FC21-B5C6-49A2-9737-4A88B538DB63}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D481FC21-B5C6-49A2-9737-4A88B538DB63}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D481FC21-B5C6-49A2-9737-4A88B538DB63}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D481FC21-B5C6-49A2-9737-4A88B538DB63}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E5E0899E-47E3-4512-97D8-9CF64506676F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E5E0899E-47E3-4512-97D8-9CF64506676F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E5E0899E-47E3-4512-97D8-9CF64506676F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E5E0899E-47E3-4512-97D8-9CF64506676F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
