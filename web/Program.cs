@@ -8,7 +8,8 @@ builder.Services.AddControllersWithViews();
 
 var connectionString = builder.Configuration["SUPABASE_DB_URL"]
     ?? throw new InvalidOperationException("SUPABASE_DB_URL is not configured.");
-builder.Services.AddSingleton<IRankingRepository>(new PostgresRankingRepository(connectionString));
+builder.Services.AddSingleton<IRankingRepository>(
+    new PostgresRankingRepository(PostgresConnectionString.FromUri(connectionString)));
 builder.Services.AddScoped<RegionMapViewModelBuilder>();
 
 var app = builder.Build();
