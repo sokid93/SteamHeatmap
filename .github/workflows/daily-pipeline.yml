@@ -1,0 +1,28 @@
+name: Daily pipeline
+
+on:
+  schedule:
+    - cron: "30 6 * * *" # daily, 06:30 UTC
+  workflow_dispatch: {}
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        working-directory: analysis
+        run: pip install -r requirements.txt
+
+      - name: Run daily pipeline
+        working-directory: analysis
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          # STEAM_API_KEY secret gets added when the top-N rankings fetch
+          # lands (issue #3); the appreviews endpoint needs no key.
+        run: python run_daily.py
