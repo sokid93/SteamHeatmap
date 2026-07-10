@@ -99,6 +99,19 @@ def test_pipeline_writes_no_rows_for_a_game_with_zero_total_reviews():
     assert [row.app_id for row in writer.written_rows] == [730]
 
 
+def test_pipeline_scores_each_language_as_its_own_region():
+    steam = FakeSteamClient(
+        totals={730: 100},
+        counts={(730, "english"): 50, (730, "japanese"): 20},
+    )
+    writer = FakeWriter()
+
+    run_pipeline(steam, writer, app_ids=[730], language_codes=["english", "japanese"])
+
+    region_codes = {row.region_code for row in writer.written_rows}
+    assert region_codes == {"english", "japanese"}
+
+
 def test_pipeline_baseline_ignores_zero_review_games():
     # If the zero-review game wrongly counted as a 0% share, the baseline
     # would halve to 0.25 and 730's concentration would inflate to ≈1.62.
