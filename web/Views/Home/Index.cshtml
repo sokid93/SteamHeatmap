@@ -45,44 +45,50 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
     <script>
-        // Walking skeleton: one block per member country of each region,
-        // shaded by the region's top concentration. Real TopoJSON world
-        // boundaries arrive with the full-map issue.
         const regions = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
             Model.Regions.Select(r => new
             {
                 code = r.Code,
                 displayName = r.DisplayName,
-                countries = r.MemberCountries,
+                mapCountryCodes = r.MapCountryCodes,
                 topGame = r.Games.FirstOrDefault()?.Name,
-                concentration = r.Games.FirstOrDefault()?.Concentration ?? 0
+                topConcentration = r.Games.FirstOrDefault()?.Concentration ?? 0
             })));
 
+        const regionByCountry = new Map();
+        regions.forEach(region => {
+            region.mapCountryCodes.forEach(code => regionByCountry.set(code, region));
+        });
+
+        const width = 960;
+        const height = 500;
         const svg = d3.select("#map").append("svg")
-            .attr("width", 640).attr("height", 160);
+            .attr("viewBox", `0 0 ${width} ${height}`);
 
         const color = d3.scaleSequential(d3.interpolateYlOrRd).domain([0, 2]);
+        const noDataFill = "#e3e3e3";
 
-        regions.forEach(region => {
-            const group = svg.selectAll(`g.${region.code}`)
-                .data(region.countries)
-                .join("g");
+        d3.json("/data/world-110m.geojson").then(world => {
+            const projection = d3.geoNaturalEarth1().fitSize([width, height], world);
+            const path = d3.geoPath(projection);
 
-            group.append("rect")
-                .attr("x", (_, i) => 10 + i * 150)
-                .attr("y", 30)
-                .attr("width", 140)
-                .attr("height", 80)
-                .attr("fill", color(region.concentration))
-                .attr("stroke", "#333")
+            svg.selectAll("path")
+                .data(world.features)
+                .join("path")
+                .attr("d", path)
+                .attr("fill", feature => {
+                    const region = regionByCountry.get(feature.properties.iso_a2);
+                    return region ? color(region.topConcentration) : noDataFill;
+                })
+                .attr("stroke", "#fff")
+                .attr("stroke-width", 0.5)
                 .append("title")
-                .text(`${region.displayName} — ${region.topGame}`);
-
-            group.append("text")
-                .attr("x", (_, i) => 80 + i * 150)
-                .attr("y", 75)
-                .attr("text-anchor", "middle")
-                .text(country => country);
+                .text(feature => {
+                    const region = regionByCountry.get(feature.properties.iso_a2);
+                    return region
+                        ? `${feature.properties.name} — ${region.displayName}: ${region.topGame}`
+                        : `${feature.properties.name} — no data yet`;
+                });
         });
     </script>
 }

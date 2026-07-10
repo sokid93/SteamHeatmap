@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.StaticFiles;
 using SteamHeatmap.Web.Domain;
 using SteamHeatmap.Web.Infrastructure;
 
@@ -23,7 +24,12 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+
+// The map's world boundaries file uses an extension the static file
+// middleware doesn't know out of the box.
+var contentTypes = new FileExtensionContentTypeProvider();
+contentTypes.Mappings[".geojson"] = "application/geo+json";
+app.UseStaticFiles(new StaticFileOptions { ContentTypeProvider = contentTypes });
 
 app.UseRouting();
 
