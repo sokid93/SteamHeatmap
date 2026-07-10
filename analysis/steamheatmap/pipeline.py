@@ -15,6 +15,21 @@ class SteamClient(Protocol):
 
     def get_language_review_count(self, app_id: int, language_code: str) -> int: ...
 
+    def get_most_played_app_ids(self) -> list[int]: ...
+
+    def get_app_name(self, app_id: int) -> str | None: ...
+
+
+@dataclass(frozen=True)
+class TrackedGame:
+    app_id: int
+    name: str
+
+
+def fetch_tracked_games(steam: SteamClient, limit: int) -> list[TrackedGame]:
+    app_ids = steam.get_most_played_app_ids()
+    return [TrackedGame(app_id=app_id, name=steam.get_app_name(app_id)) for app_id in app_ids]
+
 
 @dataclass(frozen=True)
 class RegionGameScore:

@@ -1,20 +1,34 @@
 import pytest
 
-from steamheatmap.pipeline import run_pipeline
+from steamheatmap.pipeline import TrackedGame, fetch_tracked_games, run_pipeline
 
 
 class FakeSteamClient:
-    """Canned counts standing in for real appreviews responses."""
+    """Canned responses standing in for the real Steam Web API."""
 
-    def __init__(self, counts: dict[tuple[int, str], int], totals: dict[int, int]):
-        self._counts = counts
-        self._totals = totals
+    def __init__(
+        self,
+        counts: dict[tuple[int, str], int] | None = None,
+        totals: dict[int, int] | None = None,
+        most_played: list[int] | None = None,
+        names: dict[int, str] | None = None,
+    ):
+        self._counts = counts or {}
+        self._totals = totals or {}
+        self._most_played = most_played or []
+        self._names = names or {}
 
     def get_total_review_count(self, app_id: int) -> int:
         return self._totals[app_id]
 
     def get_language_review_count(self, app_id: int, language_code: str) -> int:
         return self._counts[(app_id, language_code)]
+
+    def get_most_played_app_ids(self) -> list[int]:
+        return self._most_played
+
+    def get_app_name(self, app_id: int) -> str | None:
+        return self._names.get(app_id)
 
 
 class FakeWriter:
@@ -23,6 +37,14 @@ class FakeWriter:
 
     def write_region_scores(self, rows) -> None:
         self.written_rows.extend(rows)
+
+
+def test_fetch_tracked_games_returns_app_id_and_name_from_steam():
+    steam = FakeSteamClient(most_played=[730], names={730: "Counter-Strike 2"})
+
+    tracked = fetch_tracked_games(steam, limit=1)
+
+    assert tracked == [TrackedGame(app_id=730, name="Counter-Strike 2")]
 
 
 def test_pipeline_scores_one_game_one_language_and_writes_result():
