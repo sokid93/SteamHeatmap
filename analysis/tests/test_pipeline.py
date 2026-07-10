@@ -58,6 +58,15 @@ def test_fetch_tracked_games_keeps_only_the_top_limit_games():
     assert [game.app_id for game in tracked] == [730, 570]
 
 
+def test_fetch_tracked_games_skips_games_with_no_available_name():
+    # appdetails can fail for delisted/region-locked apps; those games are dropped
+    steam = FakeSteamClient(most_played=[730, 999999], names={730: "Counter-Strike 2"})
+
+    tracked = fetch_tracked_games(steam, limit=2)
+
+    assert tracked == [TrackedGame(app_id=730, name="Counter-Strike 2")]
+
+
 def test_pipeline_scores_one_game_one_language_and_writes_result():
     steam = FakeSteamClient(totals={730: 100}, counts={(730, "english"): 50})
     writer = FakeWriter()

@@ -27,8 +27,13 @@ class TrackedGame:
 
 
 def fetch_tracked_games(steam: SteamClient, limit: int) -> list[TrackedGame]:
-    app_ids = steam.get_most_played_app_ids()[:limit]
-    return [TrackedGame(app_id=app_id, name=steam.get_app_name(app_id)) for app_id in app_ids]
+    tracked: list[TrackedGame] = []
+    for app_id in steam.get_most_played_app_ids()[:limit]:
+        name = steam.get_app_name(app_id)
+        if name is None:
+            continue
+        tracked.append(TrackedGame(app_id=app_id, name=name))
+    return tracked
 
 
 @dataclass(frozen=True)
