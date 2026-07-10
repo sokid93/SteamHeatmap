@@ -20,7 +20,10 @@
         <ol>
             @foreach (var game in region.Games)
             {
-                <li>@game.Name — concentration @game.Concentration.ToString("0.000", System.Globalization.CultureInfo.InvariantCulture)</li>
+                <li>
+                    <a href="@game.StoreUrl" target="_blank" rel="noopener">@game.Name</a>
+                    — concentration @game.Concentration.ToString("0.000", System.Globalization.CultureInfo.InvariantCulture)
+                </li>
             }
         </ol>
     </section>
