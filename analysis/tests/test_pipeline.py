@@ -83,3 +83,20 @@ def test_pipeline_scores_one_game_one_language_and_writes_result():
     assert row.wilson_adjusted_share == pytest.approx(0.4038, abs=0.0005)
     # Baseline across the (single-game) tracked set is 0.5; 0.4038 / 0.5
     assert row.concentration == pytest.approx(0.8077, abs=0.001)
+
+
+def test_pipeline_baseline_spans_all_tracked_games():
+    # 730 has 50% english share, 570 has 10% — baseline is their average, 0.3.
+    # If the baseline wrongly used only 730's own share (0.5), its
+    # concentration would be ≈0.81 instead of the expected ≈1.35.
+    steam = FakeSteamClient(
+        totals={730: 100, 570: 100},
+        counts={(730, "english"): 50, (570, "english"): 10},
+    )
+    writer = FakeWriter()
+
+    run_pipeline(steam, writer, app_ids=[730, 570], language_codes=["english"])
+
+    row_730 = next(row for row in writer.written_rows if row.app_id == 730)
+    # Hand-computed: Wilson LB(50/100) ≈ 0.4038, baseline (0.5 + 0.1) / 2 = 0.3
+    assert row_730.concentration == pytest.approx(0.4038 / 0.3, abs=0.005)
