@@ -32,6 +32,7 @@ public class RegionMapViewModelBuilder
                     MemberCountries: first.MemberCountries,
                     Blended: first.Blended,
                     Games: group
+                        .OrderByDescending(s => s.Concentration)
                         .Select(s => new GameEntry(s.AppId, s.GameName, s.Concentration))
                         .ToList());
             })

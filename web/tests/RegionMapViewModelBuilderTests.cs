@@ -39,4 +39,30 @@ public class RegionMapViewModelBuilderTests
         Assert.Equal("Counter-Strike 2", game.Name);
         Assert.Equal(0.81, game.Concentration, precision: 3);
     }
+
+    [Fact]
+    public async Task RanksGamesWithinARegionByConcentrationDescending()
+    {
+        var repository = new FakeRankingRepository(new[]
+        {
+            EnglishScore(appId: 730, gameName: "Counter-Strike 2", concentration: 0.81),
+            EnglishScore(appId: 570, gameName: "Dota 2", concentration: 1.35),
+        });
+        var builder = new RegionMapViewModelBuilder(repository);
+
+        var viewModel = await builder.Build();
+
+        var region = Assert.Single(viewModel.Regions);
+        Assert.Equal(new[] { "Dota 2", "Counter-Strike 2" }, region.Games.Select(g => g.Name));
+    }
+
+    private static RegionGameScore EnglishScore(int appId, string gameName, double concentration) =>
+        new(
+            RegionCode: "english",
+            RegionDisplayName: "English-speaking",
+            MemberCountries: new[] { "US", "UK", "CA", "AU" },
+            Blended: true,
+            AppId: appId,
+            GameName: gameName,
+            Concentration: concentration);
 }
