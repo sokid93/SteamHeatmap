@@ -99,6 +99,22 @@ def test_pipeline_writes_no_rows_for_a_game_with_zero_total_reviews():
     assert [row.app_id for row in writer.written_rows] == [730]
 
 
+def test_pipeline_baseline_ignores_zero_review_games():
+    # If the zero-review game wrongly counted as a 0% share, the baseline
+    # would halve to 0.25 and 730's concentration would inflate to ≈1.62.
+    steam = FakeSteamClient(
+        totals={730: 100, 111: 0},
+        counts={(730, "english"): 50, (111, "english"): 0},
+    )
+    writer = FakeWriter()
+
+    run_pipeline(steam, writer, app_ids=[730, 111], language_codes=["english"])
+
+    row_730 = next(row for row in writer.written_rows if row.app_id == 730)
+    # Hand-computed: Wilson LB(50/100) ≈ 0.4038, baseline from 730 alone = 0.5
+    assert row_730.concentration == pytest.approx(0.4038 / 0.5, abs=0.005)
+
+
 def test_pipeline_baseline_spans_all_tracked_games():
     # 730 has 50% english share, 570 has 10% — baseline is their average, 0.3.
     # If the baseline wrongly used only 730's own share (0.5), its
