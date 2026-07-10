@@ -112,6 +112,7 @@ each refinement dated and traceable to the review that triggered it.
 | 2026-07-10 | Stage files explicitly, never `git add <dir>` | A directory-wide `add` swept an unverified file into a test-only commit; caught and split before push |
 | 2026-07-10 | End-to-end verification with a headless browser (scripted hover/click) added to the definition of done for UI work | Map interaction couldn't be honestly verified by unit tests or static screenshots |
 | 2026-07-10 | Real-data findings that belong to an open decision get parked on the owning issue with evidence, not fixed inline | First full 30-language run saturated the map's color scale — evidence filed on #9, which owns scoring/tuning |
+| 2026-07-10 | Every session ends with a documentation pass: refresh CONTEXT.md status, append any new row to this table, adjust the README if the product changed | This documentation set was written days after the code it describes — catching up is costlier than keeping up |
 
 The table grows as the process does; an entry that never gets superseded is as
 informative as one that does.
