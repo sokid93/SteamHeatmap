@@ -56,6 +56,21 @@ public class RegionMapViewModelBuilderTests
         Assert.Equal(new[] { "Dota 2", "Counter-Strike 2" }, region.Games.Select(g => g.Name));
     }
 
+    [Fact]
+    public async Task KeepsOnlyTheTenHighestRankedGamesPerRegion()
+    {
+        var elevenGames = Enumerable.Range(1, 11)
+            .Select(i => EnglishScore(appId: i, gameName: $"Game {i}", concentration: i))
+            .ToArray();
+        var builder = new RegionMapViewModelBuilder(new FakeRankingRepository(elevenGames));
+
+        var viewModel = await builder.Build();
+
+        var region = Assert.Single(viewModel.Regions);
+        Assert.Equal(10, region.Games.Count);
+        Assert.DoesNotContain("Game 1", region.Games.Select(g => g.Name)); // the lowest ranked
+    }
+
     private static RegionGameScore EnglishScore(int appId, string gameName, double concentration) =>
         new(
             RegionCode: "english",

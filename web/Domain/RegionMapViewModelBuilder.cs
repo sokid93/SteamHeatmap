@@ -13,6 +13,8 @@ public record RegionMapViewModel(IReadOnlyList<RegionEntry> Regions);
 
 public class RegionMapViewModelBuilder
 {
+    private const int GamesShownPerRegion = 10;
+
     private readonly IRankingRepository _repository;
 
     public RegionMapViewModelBuilder(IRankingRepository repository) => _repository = repository;
@@ -33,6 +35,7 @@ public class RegionMapViewModelBuilder
                     Blended: first.Blended,
                     Games: group
                         .OrderByDescending(s => s.Concentration)
+                        .Take(GamesShownPerRegion)
                         .Select(s => new GameEntry(s.AppId, s.GameName, s.Concentration))
                         .ToList());
             })
