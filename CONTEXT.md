@@ -2,7 +2,7 @@
 
 A web app showing, per country/region, which Steam games are most disproportionately popular there — using review-language distribution as a proxy for geography, since Steam has no public per-country data.
 
-Read this file in full at the start of any session touching this project. Read individual ADRs in `adr/` only when working in the area they concern.
+Read this file in full at the start of any session touching this project. Read individual ADRs in `adr/` only when working in the area they concern. Follow the development process in `docs/methodology.md` — strict TDD cycles, one commit per cycle, push per feature.
 
 ## Domain vocabulary
 
@@ -25,4 +25,8 @@ Read this file in full at the start of any session touching this project. Read i
 
 ## Current status
 
-Architecture and MVP scope agreed (see ADRs). PRD and issue breakdown not yet produced. No code written yet.
+As of 2026-07-10 — MVP largely working end to end:
+
+- **Done** (issues #2–#7 closed): walking skeleton; daily pipeline tracking the real top-100 most-played games across all 30 review languages (~3,100 keyless API calls/day, runs green on GitHub Actions); full 30-region language mapping per ADR-002's concrete table; world map rendered from self-hosted Natural Earth GeoJSON with hover/click region panels; store links; always-visible disclosures.
+- **Open**: #8 production hosting (blocked on Azure CLI setup/login); #9 scoring/tuning against real data (needs a grill-me — note the color-scale saturation evidence in its comments); #10 blended-region visual treatment (needs a grill-me).
+- Pipeline needs no Steam API key — `GetMostPlayedGames` and `appreviews` are both public. `SUPABASE_DB_URL` is the only secret (GitHub Actions secret + local user env var).
