@@ -23,6 +23,6 @@ jobs:
         working-directory: analysis
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
-          # STEAM_API_KEY secret gets added when the top-N rankings fetch
-          # lands (issue #3); the appreviews endpoint needs no key.
+          # No Steam API key needed: both GetMostPlayedGames and appreviews
+          # are public, keyless endpoints.
         run: python run_daily.py
