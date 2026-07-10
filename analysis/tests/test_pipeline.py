@@ -85,6 +85,20 @@ def test_pipeline_scores_one_game_one_language_and_writes_result():
     assert row.concentration == pytest.approx(0.8077, abs=0.001)
 
 
+def test_pipeline_writes_no_rows_for_a_game_with_zero_total_reviews():
+    # Seen in production: an unreleased/review-disabled game in the top 100.
+    # No reviews means no language signal, so the game is left unscored.
+    steam = FakeSteamClient(
+        totals={730: 100, 111: 0},
+        counts={(730, "english"): 50, (111, "english"): 0},
+    )
+    writer = FakeWriter()
+
+    run_pipeline(steam, writer, app_ids=[730, 111], language_codes=["english"])
+
+    assert [row.app_id for row in writer.written_rows] == [730]
+
+
 def test_pipeline_baseline_spans_all_tracked_games():
     # 730 has 50% english share, 570 has 10% — baseline is their average, 0.3.
     # If the baseline wrongly used only 730's own share (0.5), its

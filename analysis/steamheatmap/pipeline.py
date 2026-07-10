@@ -57,9 +57,14 @@ def run_pipeline(
     language_codes: list[str],
 ) -> None:
     totals = {app_id: steam.get_total_review_count(app_id) for app_id in app_ids}
+
+    # A game with zero reviews carries no language signal (its share would be
+    # 0/0), so it is left out of both scoring and the baseline.
+    reviewed_app_ids = [app_id for app_id in app_ids if totals[app_id] > 0]
+
     counts = {
         (app_id, lang): steam.get_language_review_count(app_id, lang)
-        for app_id in app_ids
+        for app_id in reviewed_app_ids
         for lang in language_codes
     }
 
@@ -71,11 +76,11 @@ def run_pipeline(
                 in_language_reviews=counts[(app_id, lang)],
                 total_reviews=totals[app_id],
             )
-            for app_id in app_ids
+            for app_id in reviewed_app_ids
         ]
         baseline = region_baseline_share(tracked)
 
-        for app_id in app_ids:
+        for app_id in reviewed_app_ids:
             adjusted = wilson_lower_bound(
                 in_language_reviews=counts[(app_id, lang)],
                 total_reviews=totals[app_id],
