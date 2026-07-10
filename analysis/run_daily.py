@@ -1,4 +1,4 @@
-"""Daily job entrypoint (walking skeleton: one hardcoded game, one language).
+"""Daily job entrypoint: track the current top-N most-played games.
 
 Requires SUPABASE_DB_URL in the environment. Run from analysis/:
     .venv/Scripts/python.exe run_daily.py
@@ -8,14 +8,13 @@ import os
 import sys
 from pathlib import Path
 
-from steamheatmap.pipeline import run_pipeline
+from steamheatmap.pipeline import fetch_tracked_games, run_pipeline
 from steamheatmap.postgres_writer import PostgresWriter
 from steamheatmap.region_mapping import region_for_language
 from steamheatmap.steam_client import RequestsSteamClient
 
-# Walking-skeleton hardcoded seed (replaced by real top-N fetch in issue #3)
-TRACKED_GAMES = {730: "Counter-Strike 2"}
-LANGUAGE_CODES = ["english"]
+TOP_N_GAMES = 100  # ADR-005: track the current top ~100 by concurrent players
+LANGUAGE_CODES = ["english"]  # expands to the full language set in issue #4
 
 
 def main() -> int:
@@ -27,15 +26,19 @@ def main() -> int:
     writer = PostgresWriter(connection_string)
     writer.apply_schema((Path(__file__).parent / "schema.sql").read_text())
 
-    for app_id, name in TRACKED_GAMES.items():
-        writer.upsert_game(app_id, name)
+    steam = RequestsSteamClient()
+    tracked_games = fetch_tracked_games(steam, limit=TOP_N_GAMES)
+    print(f"Tracking {len(tracked_games)} most-played games.")
+
+    for game in tracked_games:
+        writer.upsert_game(game.app_id, game.name)
     for code in LANGUAGE_CODES:
         writer.upsert_region(region_for_language(code))
 
     run_pipeline(
-        RequestsSteamClient(),
+        steam,
         writer,
-        app_ids=list(TRACKED_GAMES.keys()),
+        app_ids=[game.app_id for game in tracked_games],
         language_codes=LANGUAGE_CODES,
     )
     print("Pipeline run complete.")
