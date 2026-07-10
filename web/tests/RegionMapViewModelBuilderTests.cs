@@ -57,6 +57,22 @@ public class RegionMapViewModelBuilderTests
     }
 
     [Fact]
+    public async Task MapCountryCodesUseIsoAlpha2SpellingForTheMapData()
+    {
+        // Region data says "UK"; the map's GeoJSON keys the United Kingdom as "GB".
+        var repository = new FakeRankingRepository(new[]
+        {
+            EnglishScore(appId: 730, gameName: "Counter-Strike 2", concentration: 0.81),
+        });
+        var builder = new RegionMapViewModelBuilder(repository);
+
+        var viewModel = await builder.Build();
+
+        var region = Assert.Single(viewModel.Regions);
+        Assert.Equal(new[] { "US", "GB", "CA", "AU" }, region.MapCountryCodes);
+    }
+
+    [Fact]
     public async Task GameEntryLinksToItsSteamStorePage()
     {
         var repository = new FakeRankingRepository(new[]
