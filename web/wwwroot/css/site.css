@@ -20,3 +20,20 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.disclosures {
+  background-color: #fff8e1;
+  border: 1px solid #e0d3a8;
+  border-radius: 4px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  max-width: 48rem;
+}
+
+.disclosures p {
+  margin-bottom: 0.25rem;
+}
+
+.disclosures p:last-child {
+  margin-bottom: 0;
+}

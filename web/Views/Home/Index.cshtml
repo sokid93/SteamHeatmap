@@ -5,6 +5,19 @@
 
 <h1>Steam Regional Popularity Heatmap</h1>
 
+<aside class="disclosures">
+    <p>
+        Region data is <strong>inferred from the language of each game's Steam reviews</strong>,
+        not from official Steam geographic data — Valve doesn't publish any. True per-country
+        data could reveal finer differences that a shared review language (like English or
+        Spanish) blurs together.
+    </p>
+    <p>
+        SteamHeatmap is not affiliated with or endorsed by Valve. Data powered by
+        <a href="https://store.steampowered.com/" target="_blank" rel="noopener">Steam</a>.
+    </p>
+</aside>
+
 <div id="map"></div>
 
 @foreach (var region in Model.Regions)
