@@ -18,29 +18,12 @@
     </p>
 </aside>
 
-<div id="map"></div>
-
-@foreach (var region in Model.Regions)
-{
-    <section class="region">
-        <h2>
-            @region.DisplayName
-            @if (region.Blended)
-            {
-                <small>(blended: @string.Join(", ", region.MemberCountries))</small>
-            }
-        </h2>
-        <ol>
-            @foreach (var game in region.Games)
-            {
-                <li>
-                    <a href="@game.StoreUrl" target="_blank" rel="noopener">@game.Name</a>
-                    — concentration @game.Concentration.ToString("0.000", System.Globalization.CultureInfo.InvariantCulture)
-                </li>
-            }
-        </ol>
-    </section>
-}
+<div class="map-layout">
+    <div id="map"></div>
+    <aside id="region-panel">
+        <p class="region-panel-hint">Hover or click a colored region to see which games are disproportionately popular there.</p>
+    </aside>
+</div>
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
@@ -50,9 +33,16 @@
             {
                 code = r.Code,
                 displayName = r.DisplayName,
+                memberCountries = r.MemberCountries,
                 mapCountryCodes = r.MapCountryCodes,
-                topGame = r.Games.FirstOrDefault()?.Name,
-                topConcentration = r.Games.FirstOrDefault()?.Concentration ?? 0
+                blended = r.Blended,
+                topConcentration = r.Games.FirstOrDefault()?.Concentration ?? 0,
+                games = r.Games.Select(g => new
+                {
+                    name = g.Name,
+                    storeUrl = g.StoreUrl,
+                    concentration = g.Concentration
+                })
             })));
 
         const regionByCountry = new Map();
@@ -68,25 +58,68 @@
         const color = d3.scaleSequential(d3.interpolateYlOrRd).domain([0, 2]);
         const noDataFill = "#e3e3e3";
 
+        const panel = document.getElementById("region-panel");
+
+        function showRegionInPanel(region) {
+            const blendedNote = region.blended
+                ? `<p class="region-panel-blended">Blended region: one shared review language across ${region.memberCountries.join(", ")}.</p>`
+                : "";
+            const gameItems = region.games.map(game => {
+                const concentration = game.concentration.toFixed(3);
+                return `<li><a href="${game.storeUrl}" target="_blank" rel="noopener">${game.name}</a>` +
+                    ` <span class="concentration">×${concentration}</span></li>`;
+            });
+            panel.innerHTML =
+                `<h2>${region.displayName}</h2>` +
+                blendedNote +
+                `<ol>${gameItems.join("")}</ol>`;
+        }
+
         d3.json("/data/world-110m.geojson").then(world => {
             const projection = d3.geoNaturalEarth1().fitSize([width, height], world);
             const path = d3.geoPath(projection);
 
-            svg.selectAll("path")
+            const regionOf = feature => regionByCountry.get(feature.properties.iso_a2);
+
+            const countries = svg.selectAll("path")
                 .data(world.features)
                 .join("path")
                 .attr("d", path)
                 .attr("fill", feature => {
-                    const region = regionByCountry.get(feature.properties.iso_a2);
+                    const region = regionOf(feature);
                     return region ? color(region.topConcentration) : noDataFill;
                 })
                 .attr("stroke", "#fff")
                 .attr("stroke-width", 0.5)
-                .append("title")
+                .attr("class", feature => regionOf(feature) ? "country has-data" : "country");
+
+            function setRegionHighlight(region, highlighted) {
+                countries
+                    .filter(feature => regionOf(feature) === region)
+                    .classed("highlighted", highlighted);
+            }
+
+            countries
+                .on("mouseover", (event, feature) => {
+                    const region = regionOf(feature);
+                    if (!region) return;
+                    setRegionHighlight(region, true);
+                    showRegionInPanel(region);
+                })
+                .on("mouseout", (event, feature) => {
+                    const region = regionOf(feature);
+                    if (region) setRegionHighlight(region, false);
+                })
+                .on("click", (event, feature) => {
+                    const region = regionOf(feature);
+                    if (region) showRegionInPanel(region);
+                });
+
+            countries.append("title")
                 .text(feature => {
-                    const region = regionByCountry.get(feature.properties.iso_a2);
+                    const region = regionOf(feature);
                     return region
-                        ? `${feature.properties.name} — ${region.displayName}: ${region.topGame}`
+                        ? `${feature.properties.name} — ${region.displayName}`
                         : `${feature.properties.name} — no data yet`;
                 });
         });
