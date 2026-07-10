@@ -10,13 +10,7 @@ public record RegionEntry(
     string DisplayName,
     IReadOnlyList<string> MemberCountries,
     bool Blended,
-    IReadOnlyList<GameEntry> Games)
-{
-    // The map's GeoJSON keys countries by ISO 3166-1 alpha-2, where the
-    // United Kingdom is "GB"; region data spells it "UK" for readability.
-    public IReadOnlyList<string> MapCountryCodes =>
-        MemberCountries.Select(code => code == "UK" ? "GB" : code).ToList();
-}
+    IReadOnlyList<GameEntry> Games);
 
 public record RegionMapViewModel(IReadOnlyList<RegionEntry> Regions);
 

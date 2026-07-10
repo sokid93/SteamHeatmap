@@ -34,7 +34,6 @@
                 code = r.Code,
                 displayName = r.DisplayName,
                 memberCountries = r.MemberCountries,
-                mapCountryCodes = r.MapCountryCodes,
                 blended = r.Blended,
                 topConcentration = r.Games.FirstOrDefault()?.Concentration ?? 0,
                 games = r.Games.Select(g => new
@@ -47,7 +46,7 @@
 
         const regionByCountry = new Map();
         regions.forEach(region => {
-            region.mapCountryCodes.forEach(code => regionByCountry.set(code, region));
+            region.memberCountries.forEach(code => regionByCountry.set(code, region));
         });
 
         const width = 960;

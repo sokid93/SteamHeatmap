@@ -21,7 +21,7 @@ public class RegionMapViewModelBuilderTests
             new RegionGameScore(
                 RegionCode: "english",
                 RegionDisplayName: "English-speaking",
-                MemberCountries: new[] { "US", "UK", "CA", "AU" },
+                MemberCountries: new[] { "US", "GB", "CA", "AU" },
                 Blended: true,
                 AppId: 730,
                 GameName: "Counter-Strike 2",
@@ -34,7 +34,7 @@ public class RegionMapViewModelBuilderTests
         var region = Assert.Single(viewModel.Regions);
         Assert.Equal("English-speaking", region.DisplayName);
         Assert.True(region.Blended);
-        Assert.Equal(new[] { "US", "UK", "CA", "AU" }, region.MemberCountries);
+        Assert.Equal(new[] { "US", "GB", "CA", "AU" }, region.MemberCountries);
         var game = Assert.Single(region.Games);
         Assert.Equal("Counter-Strike 2", game.Name);
         Assert.Equal(0.81, game.Concentration, precision: 3);
@@ -54,22 +54,6 @@ public class RegionMapViewModelBuilderTests
 
         var region = Assert.Single(viewModel.Regions);
         Assert.Equal(new[] { "Dota 2", "Counter-Strike 2" }, region.Games.Select(g => g.Name));
-    }
-
-    [Fact]
-    public async Task MapCountryCodesUseIsoAlpha2SpellingForTheMapData()
-    {
-        // Region data says "UK"; the map's GeoJSON keys the United Kingdom as "GB".
-        var repository = new FakeRankingRepository(new[]
-        {
-            EnglishScore(appId: 730, gameName: "Counter-Strike 2", concentration: 0.81),
-        });
-        var builder = new RegionMapViewModelBuilder(repository);
-
-        var viewModel = await builder.Build();
-
-        var region = Assert.Single(viewModel.Regions);
-        Assert.Equal(new[] { "US", "GB", "CA", "AU" }, region.MapCountryCodes);
     }
 
     [Fact]
@@ -106,7 +90,7 @@ public class RegionMapViewModelBuilderTests
         new(
             RegionCode: "english",
             RegionDisplayName: "English-speaking",
-            MemberCountries: new[] { "US", "UK", "CA", "AU" },
+            MemberCountries: new[] { "US", "GB", "CA", "AU" },
             Blended: true,
             AppId: appId,
             GameName: gameName,
