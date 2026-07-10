@@ -47,6 +47,17 @@ def test_fetch_tracked_games_returns_app_id_and_name_from_steam():
     assert tracked == [TrackedGame(app_id=730, name="Counter-Strike 2")]
 
 
+def test_fetch_tracked_games_keeps_only_the_top_limit_games():
+    steam = FakeSteamClient(
+        most_played=[730, 570, 578080],
+        names={730: "Counter-Strike 2", 570: "Dota 2", 578080: "PUBG"},
+    )
+
+    tracked = fetch_tracked_games(steam, limit=2)
+
+    assert [game.app_id for game in tracked] == [730, 570]
+
+
 def test_pipeline_scores_one_game_one_language_and_writes_result():
     steam = FakeSteamClient(totals={730: 100}, counts={(730, "english"): 50})
     writer = FakeWriter()
