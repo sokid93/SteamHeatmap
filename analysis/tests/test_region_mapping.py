@@ -62,6 +62,18 @@ def test_blended_language_maps_to_its_member_countries(language_code, members):
     assert region.blended is True
 
 
+def test_no_country_belongs_to_more_than_one_region():
+    # ADR-002: each country is assigned to exactly one region, so the map
+    # never has two regions claiming the same shape.
+    seen: dict[str, str] = {}
+    for code in supported_language_codes():
+        for country in region_for_language(code).member_countries:
+            assert country not in seen, (
+                f"{country} is in both {seen[country]!r} and {code!r}"
+            )
+            seen[country] = code
+
+
 def test_all_thirty_steam_review_languages_are_supported():
     # Steam's documented review language codes (store API language list).
     expected = {
