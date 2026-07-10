@@ -1,6 +1,9 @@
 namespace SteamHeatmap.Web.Domain;
 
-public record GameEntry(int AppId, string Name, double Concentration);
+public record GameEntry(int AppId, string Name, double Concentration)
+{
+    public string StoreUrl => $"https://store.steampowered.com/app/{AppId}/";
+}
 
 public record RegionEntry(
     string Code,

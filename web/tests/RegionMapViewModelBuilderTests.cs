@@ -57,6 +57,21 @@ public class RegionMapViewModelBuilderTests
     }
 
     [Fact]
+    public async Task GameEntryLinksToItsSteamStorePage()
+    {
+        var repository = new FakeRankingRepository(new[]
+        {
+            EnglishScore(appId: 730, gameName: "Counter-Strike 2", concentration: 0.81),
+        });
+        var builder = new RegionMapViewModelBuilder(repository);
+
+        var viewModel = await builder.Build();
+
+        var game = Assert.Single(Assert.Single(viewModel.Regions).Games);
+        Assert.Equal("https://store.steampowered.com/app/730/", game.StoreUrl);
+    }
+
+    [Fact]
     public async Task KeepsOnlyTheTenHighestRankedGamesPerRegion()
     {
         var elevenGames = Enumerable.Range(1, 11)
