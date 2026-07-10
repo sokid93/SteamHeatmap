@@ -1,6 +1,6 @@
 import pytest
 
-from steamheatmap.region_mapping import region_for_language
+from steamheatmap.region_mapping import region_for_language, supported_language_codes
 
 # Expected pairs come from ADR-002's "Concrete mapping" table.
 SINGLE_COUNTRY_LANGUAGES = [
@@ -60,3 +60,17 @@ def test_blended_language_maps_to_its_member_countries(language_code, members):
 
     assert region.member_countries == members
     assert region.blended is True
+
+
+def test_all_thirty_steam_review_languages_are_supported():
+    # Steam's documented review language codes (store API language list).
+    expected = {
+        "arabic", "bulgarian", "schinese", "tchinese", "czech", "danish",
+        "dutch", "english", "finnish", "french", "german", "greek",
+        "hungarian", "indonesian", "italian", "japanese", "koreana",
+        "norwegian", "polish", "portuguese", "brazilian", "romanian",
+        "russian", "spanish", "latam", "swedish", "thai", "turkish",
+        "ukrainian", "vietnamese",
+    }
+
+    assert set(supported_language_codes()) == expected

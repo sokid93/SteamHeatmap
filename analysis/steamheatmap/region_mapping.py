@@ -66,3 +66,7 @@ _LANGUAGE_TO_REGION: dict[str, Region] = {
 
 def region_for_language(language_code: str) -> Region:
     return _LANGUAGE_TO_REGION[language_code]
+
+
+def supported_language_codes() -> list[str]:
+    return list(_LANGUAGE_TO_REGION)
