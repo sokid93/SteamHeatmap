@@ -25,8 +25,8 @@ Read this file in full at the start of any session touching this project. Read i
 
 ## Current status
 
-As of 2026-07-10 — MVP largely working end to end:
+As of 2026-07-14 — MVP largely working end to end:
 
-- **Done** (issues #2–#7 closed): walking skeleton; daily pipeline tracking the real top-100 most-played games across all 30 review languages (~3,100 keyless API calls/day, runs green on GitHub Actions); full 30-region language mapping per ADR-002's concrete table; world map rendered from self-hosted Natural Earth GeoJSON with hover/click region panels; store links; always-visible disclosures.
-- **Open**: #8 production hosting (blocked on Azure CLI setup/login); #9 scoring/tuning against real data (needs a grill-me — note the color-scale saturation evidence in its comments); #10 blended-region visual treatment (needs a grill-me).
+- **Done** (issues #2–#7 closed): walking skeleton; daily pipeline tracking the real top-100 most-played games across all 30 review languages (~3,100 keyless API calls/day, runs green on GitHub Actions); full 30-region language mapping per ADR-002's concrete table; world map rendered from self-hosted Natural Earth GeoJSON with hover/click region panels; store links; always-visible disclosures. Steam calls retry transient 5xx/429 with backoff after the 2026-07-14 scheduled run died on a single flaky 500 (PR #12).
+- **Open**: #8 production hosting (blocked on Azure CLI setup/login); #9 scoring/tuning against real data (needs a grill-me — note the color-scale saturation evidence in its comments); #10 blended-region visual treatment (needs a grill-me); #11 map interaction — click to pin a region, hover top-3 popup.
 - Pipeline needs no Steam API key — `GetMostPlayedGames` and `appreviews` are both public. `SUPABASE_DB_URL` is the only secret (GitHub Actions secret + local user env var).
