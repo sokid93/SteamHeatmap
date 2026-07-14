@@ -113,6 +113,9 @@ each refinement dated and traceable to the review that triggered it.
 | 2026-07-10 | End-to-end verification with a headless browser (scripted hover/click) added to the definition of done for UI work | Map interaction couldn't be honestly verified by unit tests or static screenshots |
 | 2026-07-10 | Real-data findings that belong to an open decision get parked on the owning issue with evidence, not fixed inline | First full 30-language run saturated the map's color scale — evidence filed on #9, which owns scoring/tuning |
 | 2026-07-10 | Every session ends with a documentation pass: refresh CONTEXT.md status, append any new row to this table, adjust the README if the product changed | This documentation set was written days after the code it describes — catching up is costlier than keeping up |
+| 2026-07-14 | Secrets propagate by reference (read from the local env var into each target), never through chat, logs, or command echoes | Supabase password rotation — the previous password had passed through chat, which is what forced the rotation |
+| 2026-07-14 | CI-side experiments run from a throwaway branch via `gh workflow run --ref <branch>`, never by pushing debug code to `main` | Rotated DB password failed only from GitHub Actions; needed runner-side evidence (secret hash, driver matrix) without touching the production workflow |
+| 2026-07-14 | Debug by eliminating hypotheses with byte-level evidence before blaming any component | Same incident: encoding, shell arg-mangling, and secret transport were each disproved by hash comparison inside the runner — the real culprit was a Supabase-side credential bug fixed by re-rotating |
 
 The table grows as the process does; an entry that never gets superseded is as
 informative as one that does.

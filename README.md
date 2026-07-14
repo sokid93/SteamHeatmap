@@ -5,6 +5,9 @@ popular in each region** — not just globally popular. Hover any colored region
 to see its top ten, ranked by how much more concentrated that game's audience
 is there than the worldwide average.
 
+**Live at [steamheatmap.azurewebsites.net](https://steamheatmap.azurewebsites.net)**
+(free-tier hosting — the first load after idle takes ~30 seconds).
+
 ![Map with the English-speaking region selected](docs/img/map.png)
 
 ## The problem
@@ -54,6 +57,9 @@ Steam Web API ──▶ Python daily pipeline ──▶ Postgres (Supabase) ─�
   boundaries.
 - The two codebases share only the database and the top-level docs
   ([ADR-006](adr/006-csharp-python-shared-database-integration.md)).
+- Hosting: Azure App Service (F1 free tier) for the web app, deployed by
+  GitHub Actions on every push to `main` touching `web/`; Supabase free tier
+  for Postgres ([ADR-007](adr/007-hosting-free-tier-then-vps.md)).
 
 ## Running locally
 
