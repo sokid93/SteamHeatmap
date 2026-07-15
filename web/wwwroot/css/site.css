@@ -8,17 +8,32 @@ html {
   }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
-}
-
 body {
-  margin-bottom: 60px;
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #212529;
+}
+
+a {
+  color: #0077cc;
+}
+
+.page {
+  max-width: 82rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.footer {
+  margin-top: 2rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-top: 1px solid #e5e5e5;
+  color: #6c757d;
+}
+
+.error-heading {
+  color: #b02a37;
 }
 
 .disclosures {
