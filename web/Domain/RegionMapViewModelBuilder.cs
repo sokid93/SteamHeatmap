@@ -10,7 +10,11 @@ public record RegionEntry(
     string DisplayName,
     IReadOnlyList<string> MemberCountries,
     bool Blended,
-    IReadOnlyList<GameEntry> Games);
+    IReadOnlyList<GameEntry> Games)
+{
+    /// <summary>Drives the region's shading on the map.</summary>
+    public double TopConcentration => Games.Count == 0 ? 0 : Games.Max(g => g.Concentration);
+}
 
 public record RegionMapViewModel(IReadOnlyList<RegionEntry> Regions);
 

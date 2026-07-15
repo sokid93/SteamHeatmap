@@ -86,6 +86,34 @@ public class RegionMapViewModelBuilderTests
         Assert.DoesNotContain("Game 1", region.Games.Select(g => g.Name)); // the lowest ranked
     }
 
+    [Fact]
+    public async Task RegionExposesItsTopGameConcentrationForMapShading()
+    {
+        var repository = new FakeRankingRepository(new[]
+        {
+            EnglishScore(appId: 730, gameName: "Counter-Strike 2", concentration: 0.81),
+            EnglishScore(appId: 570, gameName: "Dota 2", concentration: 1.35),
+        });
+        var builder = new RegionMapViewModelBuilder(repository);
+
+        var viewModel = await builder.Build();
+
+        Assert.Equal(1.35, Assert.Single(viewModel.Regions).TopConcentration, precision: 3);
+    }
+
+    [Fact]
+    public void RegionWithNoGamesHasZeroTopConcentration()
+    {
+        var region = new RegionEntry(
+            Code: "english",
+            DisplayName: "English-speaking",
+            MemberCountries: new[] { "US" },
+            Blended: false,
+            Games: Array.Empty<GameEntry>());
+
+        Assert.Equal(0, region.TopConcentration);
+    }
+
     private static RegionGameScore EnglishScore(int appId, string gameName, double concentration) =>
         new(
             RegionCode: "english",
