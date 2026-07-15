@@ -117,6 +117,8 @@ each refinement dated and traceable to the review that triggered it.
 | 2026-07-14 | CI-side experiments run from a throwaway branch via `gh workflow run --ref <branch>`, never by pushing debug code to `main` | Rotated DB password failed only from GitHub Actions; needed runner-side evidence (secret hash, driver matrix) without touching the production workflow |
 | 2026-07-14 | Debug by eliminating hypotheses with byte-level evidence before blaming any component | Same incident: encoding, shell arg-mangling, and secret transport were each disproved by hash comparison inside the runner — the real culprit was a Supabase-side credential bug fixed by re-rotating |
 | 2026-07-15 | The red phase contains exactly one new failing test — an edge case earns its own red before any guard code exists | `TopConcentration` cycle: two tests written in one red phase let the empty-games guard land without a failing test ever forcing it |
+| 2026-07-15 | Architecture reviewed periodically via the `improve-codebase-architecture` skill (deep-module vocabulary, visual report, candidates checked against ADRs before anything is applied) | First review found ~60k lines of template dead weight, a broken error route, and the untested inline map — two candidates shipped same-day |
+| 2026-07-15 | Grill-me decisions are grounded in queried production data before the first question is asked | Issue #9: the Wilson-vs-threshold choice was only decidable once run-12 queries showed the ×16 outlier was backed by 9 reviews over a 111k sample |
 
 The table grows as the process does; an entry that never gets superseded is as
 informative as one that does.

@@ -35,6 +35,12 @@ The interesting part is making the ranking trustworthy:
   the ranking uses the Wilson interval's lower bound: a game with 8 of 12
   reviews in Japanese scores far below one with 2,000 of 3,000, at the same
   raw percentage.
+- **Ranking eligibility** — Wilson can't catch a *confidently tiny* share
+  divided by an even tinier baseline (9 Arabic reviews out of 111,974 once
+  scored ×16). A game therefore needs at least 50 reviews in a region's
+  language to be ranked there; a region with no eligible games renders as
+  "no data" rather than as noise
+  ([ADR-013](adr/013-ranking-eligibility-minimum-sample.md)).
 
 The result on real data: Street Fighter 6 tops Japan at ×11 concentration
 while barely charting in Latin America — exactly the regional-taste signal raw
