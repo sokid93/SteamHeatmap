@@ -9,7 +9,8 @@ Read this file in full at the start of any session touching this project. Read i
 - **Region** — a country or group of countries inferred from a Steam review-language code. Most languages map to one country (e.g. `japanese` → Japan); some map to a blended group (e.g. `english` → US/UK/Canada/Australia/etc., merged and disclosed as such). See ADR-002.
 - **Language-as-proxy** — the core data strategy: Steam review language distribution stands in for true per-country data, which Steam does not expose publicly. See ADR-001.
 - **Concentration score** — how disproportionately popular a game is in a region, relative to that region's average share across all tracked games (not raw review volume). See ADR-003.
-- **Wilson score (lower bound)** — the statistical adjustment applied to concentration scores so that small review samples don't produce misleadingly extreme rankings. See ADR-004.
+- **Wilson score (lower bound)** — the statistical adjustment applied to concentration scores so that small review samples don't produce misleadingly extreme rankings. Confidence level finalized at 95%. See ADR-004.
+- **Ranking eligibility** — a game must have at least 50 reviews in a region's language to be ranked in that region; sub-threshold games still count toward the region's baseline. Protects against confident-but-tiny shares divided by tinier baselines, which Wilson cannot catch. See ADR-013.
 - **Top-N games** — the fixed seed set (current top ~100 games by live Steam concurrent-player count) that the daily pipeline tracks. Not the full Steam catalog. See ADR-005.
 - **Daily job** — the single unified batch process (Python) that fetches top-N rankings and per-language review counts once per day, computes scores, and writes results to Postgres.
 
