@@ -10,6 +10,11 @@ from steamheatmap.scoring import (
 )
 
 
+# ADR-013: below this many in-language reviews a game is not ranked in the
+# region (its share still feeds the region baseline).
+MIN_REVIEWS_TO_RANK = 50
+
+
 class SteamClient(Protocol):
     def get_total_review_count(self, app_id: int) -> int: ...
 
@@ -81,6 +86,8 @@ def run_pipeline(
         baseline = region_baseline_share(tracked)
 
         for app_id in reviewed_app_ids:
+            if counts[(app_id, lang)] < MIN_REVIEWS_TO_RANK:
+                continue
             adjusted = wilson_lower_bound(
                 in_language_reviews=counts[(app_id, lang)],
                 total_reviews=totals[app_id],

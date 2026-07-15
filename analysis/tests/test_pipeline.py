@@ -101,8 +101,8 @@ def test_pipeline_writes_no_rows_for_a_game_with_zero_total_reviews():
 
 def test_pipeline_scores_each_language_as_its_own_region():
     steam = FakeSteamClient(
-        totals={730: 100},
-        counts={(730, "english"): 50, (730, "japanese"): 20},
+        totals={730: 200},
+        counts={(730, "english"): 100, (730, "japanese"): 60},
     )
     writer = FakeWriter()
 
@@ -126,6 +126,20 @@ def test_pipeline_baseline_ignores_zero_review_games():
     row_730 = next(row for row in writer.written_rows if row.app_id == 730)
     # Hand-computed: Wilson LB(50/100) ≈ 0.4038, baseline from 730 alone = 0.5
     assert row_730.concentration == pytest.approx(0.4038 / 0.5, abs=0.005)
+
+
+def test_pipeline_ranks_only_games_with_enough_in_language_reviews():
+    # ADR-013: 49 Japanese reviews is below the 50-review eligibility
+    # threshold, so 570 gets no Japanese row — however extreme its ratio.
+    steam = FakeSteamClient(
+        totals={730: 10000, 570: 100000},
+        counts={(730, "japanese"): 5000, (570, "japanese"): 49},
+    )
+    writer = FakeWriter()
+
+    run_pipeline(steam, writer, app_ids=[730, 570], language_codes=["japanese"])
+
+    assert [row.app_id for row in writer.written_rows] == [730]
 
 
 def test_pipeline_baseline_spans_all_tracked_games():
