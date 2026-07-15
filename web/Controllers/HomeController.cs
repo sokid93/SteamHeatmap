@@ -1,5 +1,7 @@
+using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using SteamHeatmap.Web.Domain;
+using SteamHeatmap.Web.Models;
 
 namespace SteamHeatmap.Web.Controllers;
 
@@ -16,5 +18,11 @@ public class HomeController : Controller
     {
         var viewModel = await _viewModelBuilder.Build();
         return View(viewModel);
+    }
+
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    public IActionResult Error()
+    {
+        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 }
