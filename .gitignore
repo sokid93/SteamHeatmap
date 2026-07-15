@@ -16,3 +16,7 @@ __pycache__/
 # Editor/IDE
 .idea/
 .vs/
+
+# Claude Code — skills are committed; local-only state is not
+.claude/*
+!.claude/skills/
