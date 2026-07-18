@@ -1,7 +1,7 @@
 # ADR-010: Server-rendered Razor + plain CSS + D3.js, not a SPA framework
 
 ## Context
-Developer had a difficult prior experience with Tailwind (a utility CSS framework), which initially raised concern about frontend libraries generally, but was clarified as specific to heavy frontend *frameworks* (React/Vue-scale complexity/tooling), not focused single-purpose libraries. Wants "cool, smooth" visuals eventually, as this project is intended as a portfolio centerpiece.
+Developer have a strong opinion about using libraries and frameworks before they are proven useful, which initially raised concern about frontend libraries generally, but was not focused on useful single-purpose libraries. Wants "cool, smooth" visuals eventually, as this project is intended as a portfolio centerpiece.
 
 ## Decision
 - Keep the web app genuinely server-rendered: Razor views, plain CSS (no Tailwind/Bootstrap), no React/Vue/SPA framework or build pipeline.
