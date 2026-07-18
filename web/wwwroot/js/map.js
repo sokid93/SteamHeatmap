@@ -126,7 +126,6 @@ function initRegionMap({
                 if (!region) return;
                 setRegionHighlight(region, true);
                 showPopup(region, event);
-                showRegionInPanel(region);
             })
             .on("mousemove", (event, feature) => {
                 if (regionOf(feature)) movePopup(event);
