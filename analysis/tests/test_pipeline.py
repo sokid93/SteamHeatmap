@@ -78,6 +78,19 @@ def test_fetch_tracked_games_skips_games_with_no_available_name():
     assert tracked == [TrackedGame(app_id=730, name="Counter-Strike 2", rank=1)]
 
 
+def test_fetch_tracked_games_ranks_stay_consecutive_past_skipped_games():
+    # Rank orders the tracked set (featured game = rank 1, search ordering),
+    # so a delisted game must not leave a hole in the sequence.
+    steam = FakeSteamClient(
+        most_played=[730, 999999, 570],
+        names={730: "Counter-Strike 2", 570: "Dota 2"},
+    )
+
+    tracked = fetch_tracked_games(steam, limit=3)
+
+    assert [(game.app_id, game.rank) for game in tracked] == [(730, 1), (570, 2)]
+
+
 def test_pipeline_scores_one_game_one_language_and_writes_result():
     steam = FakeSteamClient(totals={730: 100}, counts={(730, "english"): 50})
     writer = FakeWriter()
