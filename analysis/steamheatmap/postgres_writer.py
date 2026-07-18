@@ -15,12 +15,15 @@ class PostgresWriter:
         with psycopg2.connect(self._connection_string) as conn, conn.cursor() as cur:
             cur.execute(schema_sql)
 
-    def upsert_game(self, app_id: int, name: str) -> None:
+    def upsert_game(self, app_id: int, name: str, most_played_rank: int) -> None:
         with psycopg2.connect(self._connection_string) as conn, conn.cursor() as cur:
             cur.execute(
-                """insert into games (app_id, name) values (%s, %s)
-                   on conflict (app_id) do update set name = excluded.name""",
-                (app_id, name),
+                """insert into games (app_id, name, most_played_rank)
+                   values (%s, %s, %s)
+                   on conflict (app_id) do update set
+                       name = excluded.name,
+                       most_played_rank = excluded.most_played_rank""",
+                (app_id, name, most_played_rank),
             )
 
     def upsert_region(self, region: Region) -> None:

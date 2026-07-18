@@ -35,7 +35,7 @@ def main() -> int:
     print(f"Tracking {len(tracked_games)} most-played games across {len(language_codes)} languages.")
 
     for game in tracked_games:
-        writer.upsert_game(game.app_id, game.name)
+        writer.upsert_game(game.app_id, game.name, game.rank)
     for code in language_codes:
         writer.upsert_region(region_for_language(code))
 

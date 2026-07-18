@@ -2,9 +2,13 @@
 -- to be revisited via grill-me once multi-game/multi-language data exists.
 
 create table if not exists games (
-    app_id integer primary key,
-    name   text not null
+    app_id           integer primary key,
+    name             text not null,
+    most_played_rank integer
 );
+
+-- Deployed before most_played_rank existed; create-if-not-exists won't add it.
+alter table games add column if not exists most_played_rank integer;
 
 create table if not exists regions (
     code             text primary key,
