@@ -7,4 +7,5 @@ public record RegionGameScore(
     bool Blended,
     int AppId,
     string GameName,
-    double Concentration);
+    double Concentration,
+    int? MostPlayedRank);

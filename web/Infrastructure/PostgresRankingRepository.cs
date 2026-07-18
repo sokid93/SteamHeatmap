@@ -13,7 +13,7 @@ public class PostgresRankingRepository : IRankingRepository
     {
         const string sql = """
             select r.code, r.display_name, r.member_countries, r.blended,
-                   g.app_id, g.name, s.concentration
+                   g.app_id, g.name, s.concentration, g.most_played_rank
             from region_scores s
             join regions r on r.code = s.region_code
             join games g on g.app_id = s.app_id
@@ -35,7 +35,8 @@ public class PostgresRankingRepository : IRankingRepository
                 Blended: reader.GetBoolean(3),
                 AppId: reader.GetInt32(4),
                 GameName: reader.GetString(5),
-                Concentration: reader.GetDouble(6)));
+                Concentration: reader.GetDouble(6),
+                MostPlayedRank: reader.IsDBNull(7) ? null : reader.GetInt32(7)));
         }
 
         return scores;

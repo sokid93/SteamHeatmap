@@ -25,7 +25,8 @@ public class RegionMapViewModelBuilderTests
                 Blended: true,
                 AppId: 730,
                 GameName: "Counter-Strike 2",
-                Concentration: 0.81),
+                Concentration: 0.81,
+                MostPlayedRank: 1),
         });
         var builder = new RegionMapViewModelBuilder(repository);
 
@@ -114,7 +115,23 @@ public class RegionMapViewModelBuilderTests
         Assert.Equal(0, region.TopConcentration);
     }
 
-    private static RegionGameScore EnglishScore(int appId, string gameName, double concentration) =>
+    [Fact]
+    public async Task ExposesTrackedGamesOrderedByMostPlayedRank()
+    {
+        var repository = new FakeRankingRepository(new[]
+        {
+            EnglishScore(appId: 570, gameName: "Dota 2", concentration: 1.35, mostPlayedRank: 2),
+            EnglishScore(appId: 730, gameName: "Counter-Strike 2", concentration: 0.81, mostPlayedRank: 1),
+        });
+        var builder = new RegionMapViewModelBuilder(repository);
+
+        var viewModel = await builder.Build();
+
+        Assert.Equal(new[] { "Counter-Strike 2", "Dota 2" }, viewModel.Games.Select(g => g.Name));
+    }
+
+    private static RegionGameScore EnglishScore(
+        int appId, string gameName, double concentration, int? mostPlayedRank = 1) =>
         new(
             RegionCode: "english",
             RegionDisplayName: "English-speaking",
@@ -122,5 +139,6 @@ public class RegionMapViewModelBuilderTests
             Blended: true,
             AppId: appId,
             GameName: gameName,
-            Concentration: concentration);
+            Concentration: concentration,
+            MostPlayedRank: mostPlayedRank);
 }

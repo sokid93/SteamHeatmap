@@ -16,7 +16,11 @@ public record RegionEntry(
     public double TopConcentration => Games.Count == 0 ? 0 : Games.Max(g => g.Concentration);
 }
 
-public record RegionMapViewModel(IReadOnlyList<RegionEntry> Regions);
+public record TrackedGameEntry(int AppId, string Name, int? MostPlayedRank);
+
+public record RegionMapViewModel(
+    IReadOnlyList<RegionEntry> Regions,
+    IReadOnlyList<TrackedGameEntry> Games);
 
 public class RegionMapViewModelBuilder
 {
@@ -48,6 +52,11 @@ public class RegionMapViewModelBuilder
             })
             .ToList();
 
-        return new RegionMapViewModel(regions);
+        var games = scores
+            .OrderBy(s => s.MostPlayedRank)
+            .Select(s => new TrackedGameEntry(s.AppId, s.GameName, s.MostPlayedRank))
+            .ToList();
+
+        return new RegionMapViewModel(regions, games);
     }
 }
