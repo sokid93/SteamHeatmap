@@ -19,6 +19,8 @@
     </p>
 </aside>
 
+<h2 id="map-headline" class="map-headline"></h2>
+
 <div class="map-layout">
     <div id="map"></div>
     <aside id="region-panel">
@@ -33,9 +35,15 @@
         initRegionMap({
             regions: @Html.Raw(JsonSerializer.Serialize(
                 Model.Regions, new JsonSerializerOptions(JsonSerializerDefaults.Web))),
+            games: @Html.Raw(JsonSerializer.Serialize(
+                Model.Games, new JsonSerializerOptions(JsonSerializerDefaults.Web))),
+            featuredAppId: @Html.Raw(JsonSerializer.Serialize(Model.FeaturedAppId)),
+            concentrationsByGame: @Html.Raw(JsonSerializer.Serialize(
+                Model.ConcentrationsByGame, new JsonSerializerOptions(JsonSerializerDefaults.Web))),
             geojsonUrl: "/data/world-110m.geojson",
             mapElement: document.getElementById("map"),
-            panelElement: document.getElementById("region-panel")
+            panelElement: document.getElementById("region-panel"),
+            headlineElement: document.getElementById("map-headline")
         });
     </script>
 }

@@ -63,6 +63,50 @@ a {
 #map {
   flex: 2 1 32rem;
   min-width: 20rem;
+  position: relative; /* anchors the hover popup */
+}
+
+.map-headline {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+}
+
+.map-popup {
+  position: absolute;
+  z-index: 10;
+  max-width: 18rem;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+  pointer-events: none;
+}
+
+.map-popup h3 {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+}
+
+.map-popup ol {
+  margin: 0.25rem 0;
+  padding-left: 1.25rem;
+}
+
+.map-popup .concentration {
+  color: #666;
+}
+
+.popup-game-line {
+  margin: 0 0 0.25rem;
+  font-weight: 600;
+}
+
+.popup-no-signal {
+  font-weight: 400;
+  color: #666;
 }
 
 #region-panel {
