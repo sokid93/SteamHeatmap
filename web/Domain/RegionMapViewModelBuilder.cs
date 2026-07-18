@@ -20,7 +20,11 @@ public record TrackedGameEntry(int AppId, string Name, int? MostPlayedRank);
 
 public record RegionMapViewModel(
     IReadOnlyList<RegionEntry> Regions,
-    IReadOnlyList<TrackedGameEntry> Games);
+    IReadOnlyList<TrackedGameEntry> Games)
+{
+    /// <summary>The game whose heatmap the map shows on landing (ADR-014).</summary>
+    public int? FeaturedAppId => Games[0].AppId;
+}
 
 public class RegionMapViewModelBuilder
 {

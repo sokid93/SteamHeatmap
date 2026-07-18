@@ -161,6 +161,21 @@ public class RegionMapViewModelBuilderTests
         Assert.Equal(new[] { "Counter-Strike 2", "Legacy Game" }, viewModel.Games.Select(g => g.Name));
     }
 
+    [Fact]
+    public async Task FeaturedGameIsTheHighestRankedTrackedGame()
+    {
+        var repository = new FakeRankingRepository(new[]
+        {
+            EnglishScore(appId: 570, gameName: "Dota 2", concentration: 1.35, mostPlayedRank: 2),
+            EnglishScore(appId: 730, gameName: "Counter-Strike 2", concentration: 0.81, mostPlayedRank: 1),
+        });
+        var builder = new RegionMapViewModelBuilder(repository);
+
+        var viewModel = await builder.Build();
+
+        Assert.Equal(730, viewModel.FeaturedAppId);
+    }
+
     private static RegionGameScore JapaneseScore(
         int appId, string gameName, double concentration, int? mostPlayedRank = 1) =>
         new(
