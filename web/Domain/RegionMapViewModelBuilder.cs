@@ -54,6 +54,8 @@ public class RegionMapViewModelBuilder
 
         var games = scores
             .OrderBy(s => s.MostPlayedRank)
+            .GroupBy(s => s.AppId)
+            .Select(group => group.First())
             .Select(s => new TrackedGameEntry(s.AppId, s.GameName, s.MostPlayedRank))
             .ToList();
 
