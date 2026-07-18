@@ -23,7 +23,7 @@ public record RegionMapViewModel(
     IReadOnlyList<TrackedGameEntry> Games)
 {
     /// <summary>The game whose heatmap the map shows on landing (ADR-014).</summary>
-    public int? FeaturedAppId => Games[0].AppId;
+    public int? FeaturedAppId => Games.Count == 0 ? null : Games[0].AppId;
 }
 
 public class RegionMapViewModelBuilder

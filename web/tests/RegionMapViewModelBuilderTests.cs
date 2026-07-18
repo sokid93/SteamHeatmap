@@ -176,6 +176,18 @@ public class RegionMapViewModelBuilderTests
         Assert.Equal(730, viewModel.FeaturedAppId);
     }
 
+    [Fact]
+    public async Task NoTrackedGamesMeansNoFeaturedGame()
+    {
+        // An empty region_scores table (fresh install) must not break the page.
+        var builder = new RegionMapViewModelBuilder(
+            new FakeRankingRepository(Array.Empty<RegionGameScore>()));
+
+        var viewModel = await builder.Build();
+
+        Assert.Null(viewModel.FeaturedAppId);
+    }
+
     private static RegionGameScore JapaneseScore(
         int appId, string gameName, double concentration, int? mostPlayedRank = 1) =>
         new(
