@@ -204,6 +204,21 @@ public class RegionMapViewModelBuilderTests
         Assert.Equal(2.1, viewModel.ConcentrationsByGame[730]["japanese"], precision: 3);
     }
 
+    [Fact]
+    public async Task ConcentrationLookupIsNotTruncatedToTheRegionPanelTopTen()
+    {
+        // ADR-014: a missing lookup entry renders white ("no signal"), so the
+        // lookup must carry every eligible score, not the panel's top 10.
+        var elevenGames = Enumerable.Range(1, 11)
+            .Select(i => EnglishScore(appId: i, gameName: $"Game {i}", concentration: i))
+            .ToArray();
+        var builder = new RegionMapViewModelBuilder(new FakeRankingRepository(elevenGames));
+
+        var viewModel = await builder.Build();
+
+        Assert.Equal(11, viewModel.ConcentrationsByGame.Count);
+    }
+
     private static RegionGameScore JapaneseScore(
         int appId, string gameName, double concentration, int? mostPlayedRank = 1) =>
         new(
