@@ -119,6 +119,7 @@ each refinement dated and traceable to the review that triggered it.
 | 2026-07-15 | The red phase contains exactly one new failing test — an edge case earns its own red before any guard code exists | `TopConcentration` cycle: two tests written in one red phase let the empty-games guard land without a failing test ever forcing it |
 | 2026-07-15 | Architecture reviewed periodically via the `improve-codebase-architecture` skill (deep-module vocabulary, visual report, candidates checked against ADRs before anything is applied) | First review found ~60k lines of template dead weight, a broken error route, and the untested inline map — two candidates shipped same-day |
 | 2026-07-15 | Grill-me decisions are grounded in queried production data before the first question is asked | Issue #9: the Wilson-vs-threshold choice was only decidable once run-12 queries showed the ×16 outlier was backed by 9 reviews over a 111k sample |
+| 2026-07-18 | A grill-me may overturn an issue's premise, not just answer its question — the issue is then rewritten as new vertical slices around the better premise instead of patched | Issue #10 arrived as "normalize the color scale"; the human's opening challenge ("what does intensity even tell us?") exposed the encoding itself as confounded, and the session produced ADR-014 plus three rescoped issues |
 
 The table grows as the process does; an entry that never gets superseded is as
 informative as one that does.
