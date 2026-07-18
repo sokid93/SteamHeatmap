@@ -20,7 +20,8 @@ public record TrackedGameEntry(int AppId, string Name, int? MostPlayedRank);
 
 public record RegionMapViewModel(
     IReadOnlyList<RegionEntry> Regions,
-    IReadOnlyList<TrackedGameEntry> Games)
+    IReadOnlyList<TrackedGameEntry> Games,
+    IReadOnlyDictionary<int, IReadOnlyDictionary<string, double>> ConcentrationsByGame)
 {
     /// <summary>The game whose heatmap the map shows on landing (ADR-014).</summary>
     public int? FeaturedAppId => Games.Count == 0 ? null : Games[0].AppId;
@@ -63,6 +64,13 @@ public class RegionMapViewModelBuilder
             .Select(s => new TrackedGameEntry(s.AppId, s.GameName, s.MostPlayedRank))
             .ToList();
 
-        return new RegionMapViewModel(regions, games);
+        var concentrationsByGame = scores
+            .GroupBy(s => s.AppId)
+            .ToDictionary(
+                group => group.Key,
+                group => (IReadOnlyDictionary<string, double>)group
+                    .ToDictionary(s => s.RegionCode, s => s.Concentration));
+
+        return new RegionMapViewModel(regions, games, concentrationsByGame);
     }
 }

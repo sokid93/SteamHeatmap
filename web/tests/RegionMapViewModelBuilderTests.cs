@@ -188,6 +188,22 @@ public class RegionMapViewModelBuilderTests
         Assert.Null(viewModel.FeaturedAppId);
     }
 
+    [Fact]
+    public async Task ExposesEveryConcentrationKeyedByGameAndRegion()
+    {
+        var repository = new FakeRankingRepository(new[]
+        {
+            EnglishScore(appId: 730, gameName: "Counter-Strike 2", concentration: 0.81),
+            JapaneseScore(appId: 730, gameName: "Counter-Strike 2", concentration: 2.1),
+        });
+        var builder = new RegionMapViewModelBuilder(repository);
+
+        var viewModel = await builder.Build();
+
+        Assert.Equal(0.81, viewModel.ConcentrationsByGame[730]["english"], precision: 3);
+        Assert.Equal(2.1, viewModel.ConcentrationsByGame[730]["japanese"], precision: 3);
+    }
+
     private static RegionGameScore JapaneseScore(
         int appId, string gameName, double concentration, int? mostPlayedRank = 1) =>
         new(
