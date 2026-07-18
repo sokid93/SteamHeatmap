@@ -145,6 +145,22 @@ public class RegionMapViewModelBuilderTests
         Assert.Single(viewModel.Games);
     }
 
+    [Fact]
+    public async Task GamesWithoutARankYetGoLastInTheTrackedList()
+    {
+        // Rows written before the pipeline started persisting ranks carry null.
+        var repository = new FakeRankingRepository(new[]
+        {
+            EnglishScore(appId: 999, gameName: "Legacy Game", concentration: 1.0, mostPlayedRank: null),
+            EnglishScore(appId: 730, gameName: "Counter-Strike 2", concentration: 0.81, mostPlayedRank: 5),
+        });
+        var builder = new RegionMapViewModelBuilder(repository);
+
+        var viewModel = await builder.Build();
+
+        Assert.Equal(new[] { "Counter-Strike 2", "Legacy Game" }, viewModel.Games.Select(g => g.Name));
+    }
+
     private static RegionGameScore JapaneseScore(
         int appId, string gameName, double concentration, int? mostPlayedRank = 1) =>
         new(
