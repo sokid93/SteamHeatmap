@@ -29,6 +29,7 @@ class SteamClient(Protocol):
 class TrackedGame:
     app_id: int
     name: str
+    rank: int
 
 
 def fetch_tracked_games(steam: SteamClient, limit: int) -> list[TrackedGame]:
@@ -37,7 +38,7 @@ def fetch_tracked_games(steam: SteamClient, limit: int) -> list[TrackedGame]:
         name = steam.get_app_name(app_id)
         if name is None:
             continue
-        tracked.append(TrackedGame(app_id=app_id, name=name))
+        tracked.append(TrackedGame(app_id=app_id, name=name, rank=len(tracked) + 1))
     return tracked
 
 

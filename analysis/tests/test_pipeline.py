@@ -44,7 +44,18 @@ def test_fetch_tracked_games_returns_app_id_and_name_from_steam():
 
     tracked = fetch_tracked_games(steam, limit=1)
 
-    assert tracked == [TrackedGame(app_id=730, name="Counter-Strike 2")]
+    assert tracked == [TrackedGame(app_id=730, name="Counter-Strike 2", rank=1)]
+
+
+def test_fetch_tracked_games_assigns_most_played_rank_in_order():
+    steam = FakeSteamClient(
+        most_played=[730, 570],
+        names={730: "Counter-Strike 2", 570: "Dota 2"},
+    )
+
+    tracked = fetch_tracked_games(steam, limit=2)
+
+    assert [(game.app_id, game.rank) for game in tracked] == [(730, 1), (570, 2)]
 
 
 def test_fetch_tracked_games_keeps_only_the_top_limit_games():
@@ -64,7 +75,7 @@ def test_fetch_tracked_games_skips_games_with_no_available_name():
 
     tracked = fetch_tracked_games(steam, limit=2)
 
-    assert tracked == [TrackedGame(app_id=730, name="Counter-Strike 2")]
+    assert tracked == [TrackedGame(app_id=730, name="Counter-Strike 2", rank=1)]
 
 
 def test_pipeline_scores_one_game_one_language_and_writes_result():
