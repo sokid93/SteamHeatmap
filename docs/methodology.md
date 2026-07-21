@@ -25,7 +25,12 @@ Every feature follows the same cycle:
    remote stay quiet while the local history keeps every step. This applies to
    documentation too: a status update, a new vocabulary entry, and a new
    evolution-table row are three separate concerns, so they're three commits,
-   even when all three land in the same session.
+   even when all three land in the same session. Tag choice is a judgment
+   call, not just a lookup: when a cycle's code change is really *adapting
+   already-written code* to fit a new feature (widening an existing type,
+   changing a signature, extending a schema) rather than adding something from
+   scratch, `refactor:` often reads clearer than `feat:` — worth a moment's
+   thought each time, not a strict rule.
 
 The result is a git history you can read like a narrative. Example — issue #4
 (full language-to-region mapping) landed as seven consecutive commits, each one
@@ -124,6 +129,7 @@ each refinement dated and traceable to the review that triggered it.
 | 2026-07-15 | Grill-me decisions are grounded in queried production data before the first question is asked | Issue #9: the Wilson-vs-threshold choice was only decidable once run-12 queries showed the ×16 outlier was backed by 9 reviews over a 111k sample |
 | 2026-07-18 | A grill-me may overturn an issue's premise, not just answer its question — the issue is then rewritten as new vertical slices around the better premise instead of patched | Issue #10 arrived as "normalize the color scale"; the human's opening challenge ("what does intensity even tell us?") exposed the encoding itself as confounded, and the session produced ADR-014 plus three rescoped issues |
 | 2026-07-21 | Documentation-only changes split one commit per distinct topic, same as code — a status update, a vocabulary addition, and a new evolution-table row are three commits, not one | Review of `0525232`: map redesign status, the featured-game vocabulary entry, and this table's premise-overturn row landed together despite being unrelated changes |
+| 2026-07-21 | When a cycle changes already-written code to fit a new feature (a field added to an existing type, a widened signature, an extended schema) rather than adding something from scratch, `refactor:` often describes it more clearly than `feat:` — a judgment call weighed each time, not a strict rule | Review of the most-played-rank commits (`6c7d32e`, `4451d7c`, `8e19ada`): each adapted existing code for the new feature, so `refactor:` would have read more precisely than `feat:` |
 
 The table grows as the process does; an entry that never gets superseded is as
 informative as one that does.
