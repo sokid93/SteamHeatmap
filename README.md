@@ -1,9 +1,11 @@
 # Steam Regional Popularity Heatmap
 
 An interactive world map showing which Steam games are **disproportionately
-popular in each region** — not just globally popular. Hover any colored region
-to see its top ten, ranked by how much more concentrated that game's audience
-is there than the worldwide average.
+popular in each region** — not just globally popular. The map shows one game's
+concentration heatmap at a time (search any tracked game, or start from the
+current global #1); hover a region for an instant top-3 preview, or click to
+pin its full top ten, ranked by how much more concentrated that game's
+audience is there than the worldwide average.
 
 **Live at [steamheatmap.azurewebsites.net](https://steamheatmap.azurewebsites.net)**
 (free-tier hosting — the first load after idle takes ~30 seconds).
@@ -92,7 +94,7 @@ per test, one commit per red→green→refactor cycle, decisions interviewed and
 recorded as ADRs, and end-to-end verification (live API runs, scripted
 headless-browser checks) before any issue closes. The git history is meant to
 be read — see **[docs/methodology.md](docs/methodology.md)** for the process
-and its chronological evolution, and **[adr/](adr/)** for the twelve
+and its chronological evolution, and **[adr/](adr/)** for the fourteen
 architecture decision records behind the design.
 
 ## Disclosures
