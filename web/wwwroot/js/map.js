@@ -127,6 +127,18 @@ function initRegionMap({
     searchInputElement.addEventListener("input", renderSuggestions);
     searchInputElement.addEventListener("focus", renderSuggestions);
 
+    // Set once the map has finished loading (below) — selecting a game needs
+    // the painting/mode functions that live inside that async callback.
+    let selectGame = () => {};
+
+    searchResultsElement.addEventListener("click", event => {
+        const item = event.target.closest("li[data-app-id]");
+        if (!item) return;
+        selectGame(gameById.get(Number(item.dataset.appId)));
+        searchInputElement.value = "";
+        searchResultsElement.innerHTML = "";
+    });
+
     d3.json(geojsonUrl).then(world => {
         const projection = d3.geoNaturalEarth1().fitSize([width, height], world);
         const path = d3.geoPath(projection);
@@ -216,6 +228,13 @@ function initRegionMap({
         countries.filter(feature => !regionOf(feature))
             .append("title")
             .text(feature => `${feature.properties.name} — no data yet`);
+
+        selectGame = game => {
+            exitSelectedMode();
+            activeGame = game;
+            showHeadline();
+            countries.attr("fill", fillFor);
+        };
 
         document.addEventListener("keydown", event => {
             if (event.key === "Escape") exitSelectedMode();
