@@ -21,6 +21,11 @@
 
 <h2 id="map-headline" class="map-headline"></h2>
 
+<div class="game-search">
+    <input id="game-search-input" type="text" placeholder="Search a game…" autocomplete="off" />
+    <div id="game-search-results"></div>
+</div>
+
 <div class="map-layout">
     <div id="map"></div>
     <aside id="region-panel">
@@ -43,7 +48,9 @@
             geojsonUrl: "/data/world-110m.geojson",
             mapElement: document.getElementById("map"),
             panelElement: document.getElementById("region-panel"),
-            headlineElement: document.getElementById("map-headline")
+            headlineElement: document.getElementById("map-headline"),
+            searchInputElement: document.getElementById("game-search-input"),
+            searchResultsElement: document.getElementById("game-search-results")
         });
     </script>
 }

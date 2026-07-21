@@ -72,6 +72,59 @@ a {
   margin: 0 0 0.5rem;
 }
 
+.game-search {
+  position: relative;
+  max-width: 20rem;
+  margin-bottom: 1rem;
+}
+
+.game-search input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.4rem 0.6rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+#game-search-results {
+  position: absolute;
+  z-index: 20;
+  width: 100%;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+#game-search-results:empty {
+  border: none;
+  box-shadow: none;
+}
+
+#game-search-results ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+#game-search-results li {
+  padding: 0.4rem 0.6rem;
+  cursor: pointer;
+}
+
+#game-search-results li:hover {
+  background: #f0f4fa;
+}
+
+.search-no-match {
+  margin: 0;
+  padding: 0.4rem 0.6rem;
+  color: #666;
+  font-size: 0.9rem;
+}
+
 .map-popup {
   position: absolute;
   z-index: 10;

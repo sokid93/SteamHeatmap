@@ -4,6 +4,7 @@
 function initRegionMap({
     regions, games, featuredAppId, concentrationsByGame,
     geojsonUrl, mapElement, panelElement, headlineElement,
+    searchInputElement, searchResultsElement,
 }) {
     const regionByCountry = new Map();
     regions.forEach(region => {
@@ -100,6 +101,31 @@ function initRegionMap({
     }
 
     showHeadline();
+
+    // ADR-014/#14: typeahead over the embedded game list, no server round trip.
+    const MAX_SUGGESTIONS = 10;
+    const noMatchHtml =
+        '<p class="search-no-match">Not tracked yet — we currently follow ' +
+        "Steam's top 100 most-played games.</p>";
+
+    function matchingGames(query) {
+        const trimmed = query.trim().toLowerCase();
+        const matches = trimmed === ""
+            ? games
+            : games.filter(game => game.name.toLowerCase().includes(trimmed));
+        return matches.slice(0, MAX_SUGGESTIONS);
+    }
+
+    function renderSuggestions() {
+        const matches = matchingGames(searchInputElement.value);
+        searchResultsElement.innerHTML = matches.length === 0
+            ? noMatchHtml
+            : `<ul>${matches.map(game =>
+                `<li data-app-id="${game.appId}">${game.name}</li>`).join("")}</ul>`;
+    }
+
+    searchInputElement.addEventListener("input", renderSuggestions);
+    searchInputElement.addEventListener("focus", renderSuggestions);
 
     d3.json(geojsonUrl).then(world => {
         const projection = d3.geoNaturalEarth1().fitSize([width, height], world);
