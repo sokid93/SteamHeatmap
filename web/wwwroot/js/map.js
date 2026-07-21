@@ -190,5 +190,9 @@ function initRegionMap({
         countries.filter(feature => !regionOf(feature))
             .append("title")
             .text(feature => `${feature.properties.name} — no data yet`);
+
+        document.addEventListener("keydown", event => {
+            if (event.key === "Escape") exitSelectedMode();
+        });
     });
 }
