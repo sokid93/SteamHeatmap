@@ -22,7 +22,10 @@ Every feature follows the same cycle:
 4. **Commit** — one conventional commit (`feat:`/`test:`/`fix:`/`refactor:`/
    `chore:`, scoped like `feat(analysis):`) per cycle, never batching several
    cycles together. **Push happens once per completed feature**, so CI and the
-   remote stay quiet while the local history keeps every step.
+   remote stay quiet while the local history keeps every step. This applies to
+   documentation too: a status update, a new vocabulary entry, and a new
+   evolution-table row are three separate concerns, so they're three commits,
+   even when all three land in the same session.
 
 The result is a git history you can read like a narrative. Example — issue #4
 (full language-to-region mapping) landed as seven consecutive commits, each one
@@ -120,6 +123,7 @@ each refinement dated and traceable to the review that triggered it.
 | 2026-07-15 | Architecture reviewed periodically via the `improve-codebase-architecture` skill (deep-module vocabulary, visual report, candidates checked against ADRs before anything is applied) | First review found ~60k lines of template dead weight, a broken error route, and the untested inline map — two candidates shipped same-day |
 | 2026-07-15 | Grill-me decisions are grounded in queried production data before the first question is asked | Issue #9: the Wilson-vs-threshold choice was only decidable once run-12 queries showed the ×16 outlier was backed by 9 reviews over a 111k sample |
 | 2026-07-18 | A grill-me may overturn an issue's premise, not just answer its question — the issue is then rewritten as new vertical slices around the better premise instead of patched | Issue #10 arrived as "normalize the color scale"; the human's opening challenge ("what does intensity even tell us?") exposed the encoding itself as confounded, and the session produced ADR-014 plus three rescoped issues |
+| 2026-07-21 | Documentation-only changes split one commit per distinct topic, same as code — a status update, a vocabulary addition, and a new evolution-table row are three commits, not one | Review of `0525232`: map redesign status, the featured-game vocabulary entry, and this table's premise-overturn row landed together despite being unrelated changes |
 
 The table grows as the process does; an entry that never gets superseded is as
 informative as one that does.
