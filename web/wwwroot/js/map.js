@@ -31,6 +31,11 @@ function initRegionMap({
         .style("display", "none");
 
     let activeGame = gameById.get(featuredAppId);
+    let mode = "heatmap";
+    let selectedRegion = null;
+
+    const panelHintHtml =
+        '<p class="region-panel-hint">Click a region to see which games are disproportionately popular there.</p>';
 
     function concentrationInRegion(game, region) {
         if (!game) return undefined;
@@ -90,6 +95,10 @@ function initRegionMap({
             `<ol>${gameItems.join("")}</ol>`;
     }
 
+    function showPanelHint() {
+        panelElement.innerHTML = panelHintHtml;
+    }
+
     showHeadline();
 
     d3.json(geojsonUrl).then(world => {
@@ -98,18 +107,27 @@ function initRegionMap({
 
         const regionOf = feature => regionByCountry.get(feature.properties.iso_a2);
 
-        function heatmapFill(feature) {
+        // SELECTED MODE (ADR-014/#11): heatmap gone — the selected region is
+        // highlighted, other tracked regions go white, no-data stays gray.
+        function fillFor(feature) {
             const region = regionOf(feature);
             if (!region) return noDataFill;
+            if (mode === "selected") return trackedNoSignalFill;
             const concentration = concentrationInRegion(activeGame, region);
             return concentration === undefined ? trackedNoSignalFill : color(concentration);
         }
+
+        svg.append("rect")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("fill", "transparent")
+            .on("click", () => exitSelectedMode());
 
         const countries = svg.selectAll("path")
             .data(world.features)
             .join("path")
             .attr("d", path)
-            .attr("fill", heatmapFill)
+            .attr("fill", fillFor)
             .attr("stroke", "#cbcbcb")
             .attr("stroke-width", 0.5)
             .attr("class", feature => regionOf(feature) ? "country has-data" : "country");
@@ -118,6 +136,27 @@ function initRegionMap({
             countries
                 .filter(feature => regionOf(feature) === region)
                 .classed("highlighted", highlighted);
+        }
+
+        function paintSelection() {
+            countries.classed("selected", feature => regionOf(feature) === selectedRegion);
+        }
+
+        function enterSelectedMode(region) {
+            mode = "selected";
+            selectedRegion = region;
+            countries.attr("fill", fillFor);
+            paintSelection();
+            showRegionInPanel(region);
+        }
+
+        function exitSelectedMode() {
+            if (mode !== "selected") return;
+            mode = "heatmap";
+            selectedRegion = null;
+            countries.attr("fill", fillFor);
+            paintSelection();
+            showPanelHint();
         }
 
         countries
@@ -137,8 +176,15 @@ function initRegionMap({
                 hidePopup();
             })
             .on("click", (event, feature) => {
+                event.stopPropagation();
                 const region = regionOf(feature);
-                if (region) showRegionInPanel(region);
+                if (!region) {
+                    exitSelectedMode();
+                } else if (mode === "selected" && region === selectedRegion) {
+                    exitSelectedMode();
+                } else {
+                    enterSelectedMode(region);
+                }
             });
 
         countries.filter(feature => !regionOf(feature))
