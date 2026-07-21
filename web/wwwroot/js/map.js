@@ -79,7 +79,10 @@ function initRegionMap({
 
     function movePopup(event) {
         const [x, y] = d3.pointer(event, mapElement);
-        popup.style("left", `${x + 14}px`).style("top", `${y + 14}px`);
+        const popupWidth = popup.node().offsetWidth;
+        const overflowsRight = x + 14 + popupWidth > mapElement.clientWidth;
+        const left = overflowsRight ? x - 14 - popupWidth : x + 14;
+        popup.style("left", `${left}px`).style("top", `${y + 14}px`);
     }
 
     function hidePopup() {
