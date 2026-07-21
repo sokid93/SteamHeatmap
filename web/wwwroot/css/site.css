@@ -128,7 +128,7 @@ a {
 .map-popup {
   position: absolute;
   z-index: 10;
-  max-width: 18rem;
+  width: 18rem;
   background: #fff;
   border: 1px solid #ccc;
   border-radius: 4px;
