@@ -2,20 +2,29 @@
    lives here, so the dark palette is a change to this block rather than a
    sweep through the file. */
 :root {
-  --color-text: #212529;
-  --color-text-muted: #666;
-  --color-text-subtle: #6c757d;
-  --color-link: #0077cc;
-  --color-surface: #fff;
-  --color-surface-hover: #f0f4fa;
-  --color-border: #ccc;
-  --color-border-subtle: #ddd;
-  --color-divider: #e5e5e5;
-  --color-error: #b02a37;
+  /* Dark only, no prefers-color-scheme branching (ADR-015). Steam's own
+     navy/charcoal family, with contrast ratios measured against the surface
+     each token is used on:
+       text        on surface 10.1:1   on page 12.2:1
+       text-muted  on surface  5.8:1   on page  7.0:1   on surface-raised 4.9:1
+       link        on surface  7.5:1   on page  9.0:1
+       border-strong (input outlines) on surface 3.8:1
+     All clear WCAG AA (4.5:1 text, 3:1 chrome). */
+  --color-page: #10161d;
+  --color-text: #c7d5e0;
+  --color-text-muted: #8fa3b8;
+  --color-link: #66c0f4;
+  --color-surface: #1b2838;
+  --color-surface-raised: #22344a;
+  --color-surface-hover: #2a475e;
+  --color-border: #35475c;
+  --color-border-strong: #6a8299;
+  --color-divider: #263442;
+  --color-error: #ff8080;
   --color-country-stroke-highlighted: #333;
   --color-country-stroke-selected: #184f95;
 
-  --shadow-raised: 0 2px 8px rgba(0, 0, 0, 0.15);
+  --shadow-raised: 0 2px 12px rgba(0, 0, 0, 0.45);
   --radius: 4px;
 
   --space-2xs: 0.25rem;
@@ -40,7 +49,9 @@ html {
 
 body {
   margin: 0;
+  min-height: 100vh;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--color-page);
   color: var(--color-text);
 }
 
@@ -59,7 +70,7 @@ a {
   padding-top: var(--space-lg);
   padding-bottom: var(--space-lg);
   border-top: 1px solid var(--color-divider);
-  color: var(--color-text-subtle);
+  color: var(--color-text-muted);
 }
 
 .error-heading {
@@ -126,16 +137,23 @@ a {
   box-sizing: border-box;
   padding: var(--space-xs) var(--space-md);
   font-size: 1rem;
-  border: 1px solid var(--color-border);
+  font-family: inherit;
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  border: 1px solid var(--color-border-strong);
   border-radius: var(--radius);
+}
+
+.game-search input::placeholder {
+  color: var(--color-text-muted);
 }
 
 #game-search-results {
   position: absolute;
   z-index: 20;
   width: 100%;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-strong);
   border-top: none;
   border-radius: 0 0 var(--radius) var(--radius);
   box-shadow: var(--shadow-raised);
@@ -172,7 +190,7 @@ a {
   position: absolute;
   z-index: 10;
   width: 18rem;
-  background: var(--color-surface);
+  background: var(--color-surface-raised);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   box-shadow: var(--shadow-raised);
@@ -208,7 +226,7 @@ a {
 #region-panel {
   flex: 0 1 20rem;
   min-width: 14rem;
-  border: 1px solid var(--color-border-subtle);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius);
   padding: var(--space-lg) var(--space-xl);
 }
