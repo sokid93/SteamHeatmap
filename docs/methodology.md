@@ -22,7 +22,11 @@ Every feature follows the same cycle:
 4. **Commit** — one conventional commit (`feat:`/`test:`/`fix:`/`refactor:`/
    `chore:`, scoped like `feat(analysis):`) per cycle, never batching several
    cycles together. **Push happens once per completed feature**, so CI and the
-   remote stay quiet while the local history keeps every step. This applies to
+   remote stay quiet while the local history keeps every step. Because
+   `deploy-web.yml` deploys any push touching `web/`, "completed feature" means
+   a state a visitor could sensibly see: a sub-issue that deliberately leaves
+   the page mid-redesign stays local until the one that finishes it lands.
+   This applies to
    documentation too: a status update, a new vocabulary entry, and a new
    evolution-table row are three separate concerns, so they're three commits,
    even when all three land in the same session. Tag choice is a judgment
