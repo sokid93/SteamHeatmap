@@ -1,7 +1,35 @@
+/* Self-hosted so the page makes no font-CDN request (ADR-010, ADR-015). Manrope
+   ships as a variable font, so one file covers the whole 400-700 range we use —
+   two static files would mean two downloads for less. Latin subset only; game
+   titles outside it fall back to the system stack, which is correct. */
+@font-face {
+  font-family: "Manrope";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("../fonts/manrope-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 /* Design tokens (ADR-015). Every color and spacing value used more than once
    lives here, so the dark palette is a change to this block rather than a
    sweep through the file. */
 :root {
+  --font-sans: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  /* One family, five roles. Only 400 and 700 are used — no 500/600 in between,
+     so the hierarchy comes from size and color rather than from weight soup. */
+  --text-display: 2rem;
+  --text-headline: 1.5rem;
+  --text-subhead: 1.125rem;
+  --text-body: 1rem;
+  --text-caption: 0.875rem;
+  --leading-tight: 1.25;
+  --leading-normal: 1.55;
+  --tracking-tight: -0.02em;
+
   /* Dark only, no prefers-color-scheme branching (ADR-015). Steam's own
      navy/charcoal family, with contrast ratios measured against the surface
      each token is used on:
@@ -52,9 +80,19 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: var(--leading-normal);
   background-color: var(--color-page);
   color: var(--color-text);
+}
+
+h1 {
+  font-size: var(--text-display);
+  font-weight: 700;
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  margin: var(--space-3xl) 0 var(--space-xl);
 }
 
 a {
@@ -73,6 +111,7 @@ a {
   padding-bottom: var(--space-lg);
   border-top: 1px solid var(--color-divider);
   color: var(--color-text-muted);
+  font-size: var(--text-caption);
 }
 
 .error-heading {
@@ -93,7 +132,7 @@ a {
   max-width: 48rem;
   margin: 0 0 var(--space-xl);
   color: var(--color-text-muted);
-  font-size: 0.9rem;
+  font-size: var(--text-caption);
 }
 
 .map-layout {
@@ -135,10 +174,18 @@ a {
   width: 100%;
 }
 
+/* Regular, so the <strong> around the game name is what carries the emphasis —
+   the headline's job is to name the game, not to shout the whole sentence. */
 .map-headline {
-  font-size: 1.3rem;
-  font-weight: 600;
+  font-size: var(--text-headline);
+  font-weight: 400;
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
   margin: 0 0 var(--space-sm);
+}
+
+.map-headline strong {
+  font-weight: 700;
 }
 
 .game-search {
@@ -151,7 +198,7 @@ a {
   width: 100%;
   box-sizing: border-box;
   padding: var(--space-xs) var(--space-md);
-  font-size: 1rem;
+  font-size: var(--text-body);
   font-family: inherit;
   background: var(--color-surface-raised);
   color: var(--color-text);
@@ -198,7 +245,7 @@ a {
   margin: 0;
   padding: var(--space-xs) var(--space-md);
   color: var(--color-text-muted);
-  font-size: 0.9rem;
+  font-size: var(--text-caption);
 }
 
 .map-popup {
@@ -210,13 +257,15 @@ a {
   border-radius: var(--radius);
   box-shadow: var(--shadow-raised);
   padding: var(--space-sm) var(--space-lg);
-  font-size: 0.9rem;
+  font-size: var(--text-caption);
   pointer-events: none;
 }
 
 .map-popup h3 {
   margin: 0 0 var(--space-2xs);
-  font-size: 1rem;
+  font-size: var(--text-subhead);
+  font-weight: 700;
+  line-height: var(--leading-tight);
 }
 
 .map-popup ol {
@@ -247,15 +296,28 @@ a {
   padding: var(--space-xl) 0;
 }
 
+#region-panel h2 {
+  font-size: var(--text-headline);
+  font-weight: 700;
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  margin: 0 0 var(--space-sm);
+}
+
 .region-panel-hint,
 .region-panel-blended {
   color: var(--color-text-muted);
-  font-size: 0.9rem;
+  font-size: var(--text-caption);
 }
 
 #region-panel .concentration {
   color: var(--color-text-muted);
-  font-size: 0.9rem;
+  font-size: var(--text-caption);
+}
+
+/* Concentrations are read down a column, so the digits have to line up. */
+.concentration {
+  font-variant-numeric: tabular-nums;
 }
 
 .country.has-data {
