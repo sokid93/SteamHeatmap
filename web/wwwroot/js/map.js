@@ -22,10 +22,10 @@ function initRegionMap({
     const trackedNoSignalFill = "#ffffff";
     const noDataFill = "#e3e3e3";
 
+    // Height and viewBox are derived from the land once the geojson loads
+    // (#21) — the map is cropped to what it actually draws.
     const width = 960;
-    const height = 500;
-    const svg = d3.select(mapElement).append("svg")
-        .attr("viewBox", `0 0 ${width} ${height}`);
+    const svg = d3.select(mapElement).append("svg");
 
     const popup = d3.select(mapElement).append("div")
         .attr("class", "map-popup")
@@ -143,8 +143,32 @@ function initRegionMap({
     });
 
     d3.json(geojsonUrl).then(world => {
-        const projection = d3.geoNaturalEarth1().fitSize([width, height], world);
+        // #21: Antarctica is permanently grey no-data and takes ~15% of the
+        // box, and fitting the rest of the world into a fixed 960x500 letterboxed
+        // it besides. Drop AQ, then take the viewBox from the drawn land's own
+        // bounds so the map fills its surface instead of padding itself with
+        // empty ocean. Every other no-data country still renders (ADR-014).
+        const land = {
+            type: "FeatureCollection",
+            features: world.features.filter(feature => feature.properties.iso_a2 !== "AQ"),
+        };
+        const projection = d3.geoNaturalEarth1().fitWidth(width, land);
         const path = d3.geoPath(projection);
+
+        // Fiji sits on the antimeridian, so d3 draws it as two slivers pinned to
+        // opposite edges and its bounding box spans the whole map. Measuring the
+        // crop from it would spend 10% of the map's scale on empty ocean, so the
+        // crop is measured from every other country and Fiji's slivers fall
+        // outside the viewBox. No tracked region maps to FJ — it was grey
+        // no-data either way. Rotating the projection instead doesn't help:
+        // Chukotka and the Aleutians straddle the antimeridian too, so every
+        // central meridian splits something.
+        const cropReference = {
+            type: "FeatureCollection",
+            features: land.features.filter(feature => feature.properties.iso_a2 !== "FJ"),
+        };
+        const [[minX, minY], [maxX, maxY]] = path.bounds(cropReference);
+        svg.attr("viewBox", `${minX} ${minY} ${maxX - minX} ${maxY - minY}`);
 
         const regionOf = feature => regionByCountry.get(feature.properties.iso_a2);
 
@@ -159,13 +183,15 @@ function initRegionMap({
         }
 
         svg.append("rect")
-            .attr("width", width)
-            .attr("height", height)
+            .attr("x", minX)
+            .attr("y", minY)
+            .attr("width", maxX - minX)
+            .attr("height", maxY - minY)
             .attr("fill", "transparent")
             .on("click", () => exitSelectedMode());
 
         const countries = svg.selectAll("path")
-            .data(world.features)
+            .data(land.features)
             .join("path")
             .attr("d", path)
             .attr("fill", fillFor)
