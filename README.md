@@ -94,7 +94,7 @@ per test, one commit per red→green→refactor cycle, decisions interviewed and
 recorded as ADRs, and end-to-end verification (live API runs, scripted
 headless-browser checks) before any issue closes. The git history is meant to
 be read — see **[docs/methodology.md](docs/methodology.md)** for the process
-and its chronological evolution, and **[adr/](adr/)** for the fourteen
+and its chronological evolution, and **[adr/](adr/)** for the fifteen
 architecture decision records behind the design.
 
 ## Disclosures
