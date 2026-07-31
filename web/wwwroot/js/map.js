@@ -12,15 +12,23 @@ function initRegionMap({
     });
     const gameById = new Map(games.map(game => [game.appId, game]));
 
-    // ADR-014: single-hue log ramp (validated sequential blues), clamped to
-    // [1/8, 8] — ~2% of real scores fall outside. White = tracked but no
-    // signal for the shown game; gray = region outside the dataset.
-    const rampBlues = ["#cde2fb", "#9ec5f4", "#6da7ec", "#3987e5", "#256abf", "#184f95", "#0d366b"];
+    // ADR-014's encoding, ADR-015's colors: the ramp runs dark→light because it
+    // sits on a dark surface now, so magnitude still reads as "more ink". Single
+    // hue (11° spread), monotone lightness with every adjacent gap over the
+    // 0.06 OKLCH floor, low end at 2.01:1 against the surface — validated, not
+    // eyeballed. Still clamped to [1/8, 8]; ~2% of real scores fall outside.
+    const rampBlues = ["#33587c", "#2f6ea6", "#2b86c9", "#439fe2", "#6fb8ef", "#9ed3f8", "#c9e9ff"];
     const color = d3.scaleSequentialLog(d3.interpolateRgbBasis(rampBlues))
         .domain([1 / 8, 8])
         .clamp(true);
-    const trackedNoSignalFill = "#ffffff";
-    const noDataFill = "#e3e3e3";
+    // Both neutral, so neither can be mistaken for a low rung of the blue ramp:
+    // a region with no signal is a different category, not a smaller number.
+    // Tracked-but-silent stays slightly more present than never-tracked.
+    const trackedNoSignalFill = "#3d464e";
+    const noDataFill = "#262b30";
+    // Borders read as gaps between countries: darker than every fill, including
+    // the ramp's low end.
+    const countryStroke = "#131b24";
 
     // Height and viewBox are derived from the land once the geojson loads
     // (#21) — the map is cropped to what it actually draws.
@@ -195,7 +203,7 @@ function initRegionMap({
             .join("path")
             .attr("d", path)
             .attr("fill", fillFor)
-            .attr("stroke", "#cbcbcb")
+            .attr("stroke", countryStroke)
             .attr("stroke-width", 0.5)
             .attr("class", feature => regionOf(feature) ? "country has-data" : "country");
 

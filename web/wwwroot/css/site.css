@@ -21,8 +21,10 @@
   --color-border-strong: #6a8299;
   --color-divider: #263442;
   --color-error: #ff8080;
-  --color-country-stroke-highlighted: #333;
-  --color-country-stroke-selected: #184f95;
+  /* Hover reads as a bright neutral outline against every fill; selection wears
+     the accent, so the two states never look like each other (#17). */
+  --color-country-stroke-highlighted: #dce7f0;
+  --color-country-stroke-selected: #66c0f4;
 
   --shadow-raised: 0 2px 12px rgba(0, 0, 0, 0.45);
   --radius: 4px;
