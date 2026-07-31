@@ -174,6 +174,20 @@ a {
   width: 100%;
 }
 
+/* Static by design — no spinner (ADR-015). The aspect ratio mirrors the
+   cropped map's, so the svg lands at the same height the placeholder held and
+   nothing shifts. It is only a pre-load estimate: if the crop changes, the
+   worst case is a pixel or two of movement, not a broken layout. */
+.map-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 870 / 418;
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-caption);
+}
+
 /* Regular, so the <strong> around the game name is what carries the emphasis —
    the headline's job is to name the game, not to shout the whole sentence. */
 .map-headline {

@@ -33,7 +33,10 @@ function initRegionMap({
     // Height and viewBox are derived from the land once the geojson loads
     // (#21) — the map is cropped to what it actually draws.
     const width = 960;
-    const svg = d3.select(mapElement).append("svg");
+    // Height 0 until the geojson lands: an svg with no viewBox and no intrinsic
+    // size falls back to the replaced-element default of 150px, which would sit
+    // under the loading placeholder and collapse when the map arrives (#19).
+    const svg = d3.select(mapElement).append("svg").attr("height", 0);
 
     const popup = d3.select(mapElement).append("div")
         .attr("class", "map-popup")
@@ -176,7 +179,13 @@ function initRegionMap({
             features: land.features.filter(feature => feature.properties.iso_a2 !== "FJ"),
         };
         const [[minX, minY], [maxX, maxY]] = path.bounds(cropReference);
-        svg.attr("viewBox", `${minX} ${minY} ${maxX - minX} ${maxY - minY}`);
+        svg.attr("viewBox", `${minX} ${minY} ${maxX - minX} ${maxY - minY}`)
+            .attr("height", null);
+
+        // The svg now has a height, so the placeholder can go without the box
+        // collapsing between the two (#19). Same tick as the paint below.
+        const placeholder = mapElement.querySelector(".map-loading");
+        if (placeholder) placeholder.remove();
 
         const regionOf = feature => regionByCountry.get(feature.properties.iso_a2);
 

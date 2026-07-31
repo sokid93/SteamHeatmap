@@ -28,7 +28,12 @@
             Spanish) blurs together.
         </p>
 
-        <div id="map"></div>
+        @* Replaced by the svg once the geojson resolves (#19). It reserves the
+           map's height so a slow cold start shows a labelled box, not a blank
+           rectangle that reads as broken. *@
+        <div id="map">
+            <p class="map-loading">Loading map…</p>
+        </div>
     </div>
     <aside id="region-panel">
         <p class="region-panel-hint">Click a region to see which games are disproportionately popular there.</p>
