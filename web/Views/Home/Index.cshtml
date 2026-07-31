@@ -6,24 +6,30 @@
 
 <h1>Steam Regional Popularity Heatmap</h1>
 
-<h2 id="map-headline" class="map-headline"></h2>
-
-@* ADR-015: the language-proxy caveat sits under the headline, where it
-   qualifies what the map is showing. Always visible, per #6. *@
-<p class="map-caption">
-    Region data is <strong>inferred from the language of each game's Steam reviews</strong>,
-    not from official Steam geographic data — Valve doesn't publish any. True per-country
-    data could reveal finer differences that a shared review language (like English or
-    Spanish) blurs together.
-</p>
-
-<div class="game-search">
-    <input id="game-search-input" type="text" placeholder="Search a game…" autocomplete="off" />
-    <div id="game-search-results"></div>
-</div>
-
+@* ADR-015: headline, caption, search and map compose into one surface, so the
+   map reads as the page's subject instead of the last item in a stack. #map
+   stays the svg's direct container — the hover popup anchors to it. *@
 <div class="map-layout">
-    <div id="map"></div>
+    <div class="map-surface">
+        <div class="map-header">
+            <h2 id="map-headline" class="map-headline"></h2>
+            <div class="game-search">
+                <input id="game-search-input" type="text" placeholder="Search a game…" autocomplete="off" />
+                <div id="game-search-results"></div>
+            </div>
+        </div>
+
+        @* The language-proxy caveat qualifies what the map is showing.
+           Always visible, per #6. *@
+        <p class="map-caption">
+            Region data is <strong>inferred from the language of each game's Steam reviews</strong>,
+            not from official Steam geographic data — Valve doesn't publish any. True per-country
+            data could reveal finer differences that a shared review language (like English or
+            Spanish) blurs together.
+        </p>
+
+        <div id="map"></div>
+    </div>
     <aside id="region-panel">
         <p class="region-panel-hint">Click a region to see which games are disproportionately popular there.</p>
     </aside>
