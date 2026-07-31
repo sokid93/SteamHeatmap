@@ -12,8 +12,6 @@
   --color-border-subtle: #ddd;
   --color-divider: #e5e5e5;
   --color-error: #b02a37;
-  --color-notice-surface: #fff8e1;
-  --color-notice-border: #e0d3a8;
   --color-country-stroke-highlighted: #333;
   --color-country-stroke-selected: #184f95;
 
@@ -68,21 +66,21 @@ a {
   color: var(--color-error);
 }
 
-.disclosures {
-  background-color: var(--color-notice-surface);
-  border: 1px solid var(--color-notice-border);
-  border-radius: var(--radius);
-  padding: var(--space-lg) var(--space-xl);
-  margin-bottom: var(--space-xl);
-  max-width: 48rem;
+.footer p {
+  margin: 0;
 }
 
-.disclosures p {
+.footer-disclosure {
   margin-bottom: var(--space-2xs);
 }
 
-.disclosures p:last-child {
-  margin-bottom: 0;
+/* The language-proxy caveat: always visible, but sized and colored to read as
+   a caption on the headline rather than as a warning banner (ADR-015). */
+.map-caption {
+  max-width: 48rem;
+  margin: 0 0 var(--space-xl);
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
 }
 
 .map-layout {

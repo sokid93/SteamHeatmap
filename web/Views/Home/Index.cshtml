@@ -6,20 +6,16 @@
 
 <h1>Steam Regional Popularity Heatmap</h1>
 
-<aside class="disclosures">
-    <p>
-        Region data is <strong>inferred from the language of each game's Steam reviews</strong>,
-        not from official Steam geographic data — Valve doesn't publish any. True per-country
-        data could reveal finer differences that a shared review language (like English or
-        Spanish) blurs together.
-    </p>
-    <p>
-        SteamHeatmap is not affiliated with or endorsed by Valve. Data powered by
-        <a href="https://store.steampowered.com/" target="_blank" rel="noopener">Steam</a>.
-    </p>
-</aside>
-
 <h2 id="map-headline" class="map-headline"></h2>
+
+@* ADR-015: the language-proxy caveat sits under the headline, where it
+   qualifies what the map is showing. Always visible, per #6. *@
+<p class="map-caption">
+    Region data is <strong>inferred from the language of each game's Steam reviews</strong>,
+    not from official Steam geographic data — Valve doesn't publish any. True per-country
+    data could reveal finer differences that a shared review language (like English or
+    Spanish) blurs together.
+</p>
 
 <div class="game-search">
     <input id="game-search-input" type="text" placeholder="Search a game…" autocomplete="off" />

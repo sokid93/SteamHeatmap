@@ -11,8 +11,14 @@
         @RenderBody()
     </main>
 
+    @* ADR-015: the Valve non-affiliation notice lives here, where such notices
+       conventionally sit. Always visible, per #6. *@
     <footer class="page footer">
-        &copy; 2026 SteamHeatmap
+        <p class="footer-disclosure">
+            SteamHeatmap is not affiliated with or endorsed by Valve. Data powered by
+            <a href="https://store.steampowered.com/" target="_blank" rel="noopener">Steam</a>.
+        </p>
+        <p class="footer-copyright">&copy; 2026 SteamHeatmap</p>
     </footer>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
