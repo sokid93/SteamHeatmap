@@ -38,9 +38,11 @@ function initRegionMap({
     // under the loading placeholder and collapse when the map arrives (#19).
     const svg = d3.select(mapElement).append("svg").attr("height", 0);
 
+    // Visibility is a class, not a display toggle, so CSS can transition it
+    // (#20). Keeping the node in layout also means offsetWidth is measurable
+    // while hidden, which is what movePopup's edge-flip needs.
     const popup = d3.select(mapElement).append("div")
-        .attr("class", "map-popup")
-        .style("display", "none");
+        .attr("class", "map-popup");
 
     let activeGame = gameById.get(featuredAppId);
     let mode = "heatmap";
@@ -79,7 +81,7 @@ function initRegionMap({
         const topThree = region.games.slice(0, 3).map(game =>
             `<li>${game.name} <span class="concentration">×${game.concentration.toFixed(2)}</span></li>`);
         popup
-            .style("display", "block")
+            .classed("visible", true)
             .html(
                 `<h3>${region.displayName}</h3>` +
                 activeGameLine(region) +
@@ -97,7 +99,7 @@ function initRegionMap({
     }
 
     function hidePopup() {
-        popup.style("display", "none");
+        popup.classed("visible", false);
     }
 
     function showRegionInPanel(region) {

@@ -30,6 +30,10 @@
   --leading-normal: 1.55;
   --tracking-tight: -0.02em;
 
+  /* Exactly three interactions get motion (ADR-015): country hover, the popup,
+     and the search dropdown. Content swaps stay instant. */
+  --motion: 130ms ease-out;
+
   /* Dark only, no prefers-color-scheme branching (ADR-015). Steam's own
      navy/charcoal family, with contrast ratios measured against the surface
      each token is used on:
@@ -233,11 +237,19 @@ a {
   border-top: none;
   border-radius: 0 0 var(--radius) var(--radius);
   box-shadow: var(--shadow-raised);
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity var(--motion), transform var(--motion);
 }
 
+/* map.js empties this node to dismiss the list, so :empty is the hidden state.
+   That gives a real fade-in; the way out is instant, because there is no
+   content left to fade once innerHTML is cleared. */
 #game-search-results:empty {
   border: none;
   box-shadow: none;
+  opacity: 0;
+  transform: translateY(-4px);
 }
 
 #game-search-results ul {
@@ -262,7 +274,15 @@ a {
   font-size: var(--text-caption);
 }
 
+/* Hidden by visibility rather than display, so it can transition at all. The
+   delayed visibility step drops the node out of the accessibility tree once
+   the fade has finished rather than the instant it starts. */
 .map-popup {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition: opacity var(--motion), transform var(--motion),
+    visibility 0s linear 130ms;
   position: absolute;
   z-index: 10;
   width: 18rem;
@@ -273,6 +293,13 @@ a {
   padding: var(--space-sm) var(--space-lg);
   font-size: var(--text-caption);
   pointer-events: none;
+}
+
+.map-popup.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition: opacity var(--motion), transform var(--motion), visibility 0s;
 }
 
 .map-popup h3 {
@@ -334,6 +361,14 @@ a {
   font-variant-numeric: tabular-nums;
 }
 
+/* Stroke only, deliberately not fill: hovering a country changes its outline,
+   never its fill. Leaving fill out keeps the repaints that DO change it — a
+   game switch, entering selected mode — instant, which is what ADR-015 wants
+   for content swaps. */
+.country {
+  transition: stroke var(--motion), stroke-width var(--motion);
+}
+
 .country.has-data {
   cursor: pointer;
 }
@@ -346,4 +381,15 @@ a {
 .country.selected {
   stroke: var(--color-country-stroke-selected);
   stroke-width: 2;
+}
+
+/* Every transition on the page is one of the three above, so switching them all
+   off here is the whole reduced-motion story. */
+@media (prefers-reduced-motion: reduce) {
+  .country,
+  .map-popup,
+  .map-popup.visible,
+  #game-search-results {
+    transition: none;
+  }
 }
