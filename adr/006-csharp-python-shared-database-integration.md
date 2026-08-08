@@ -6,6 +6,8 @@ The developer wants C# (ASP.NET Core MVC) as the primary language and web framew
 ## Decision
 Python runs as an independent, scheduled batch process (GitHub Actions cron) that reads raw Steam data and writes fully processed results (rankings, scores) into shared Postgres tables. The C# web app only ever reads from those tables — it never invokes Python directly, and Python never calls into the C# app.
 
+**Amended (2026-08-08, ADR-016)**: "the C# web app only ever reads" is narrowed, not overturned. Out-of-catalog search needs a request-scoped live Steam fetch when a visitor selects an untracked game — Python's batch cadence can't serve that. C# gains its own minimal, request-scoped Steam-calling path solely for on-demand search scoring, writing through the same schema Python writes. Python remains the sole *batch* scorer; the two never call each other directly, and the shared-database-only integration between them is unchanged.
+
 ## Alternatives rejected
 - C# invoking Python as a subprocess: tighter coupling, harder to test each side independently, unnecessary for a daily-batch cadence.
 - Python as a small internal HTTP API called by C#: overkill for batch/offline processing; would only make sense for on-demand/live analysis, which is not the MVP shape.
