@@ -42,6 +42,14 @@ def fetch_tracked_games(steam: SteamClient, limit: int) -> list[TrackedGame]:
     return tracked
 
 
+def select_app_ids_to_track(
+    top_100_app_ids: list[int], still_relevant_app_ids: list[int]
+) -> list[int]:
+    seen = set(top_100_app_ids)
+    extras = [app_id for app_id in still_relevant_app_ids if app_id not in seen]
+    return top_100_app_ids + extras
+
+
 @dataclass(frozen=True)
 class RegionGameScore:
     app_id: int

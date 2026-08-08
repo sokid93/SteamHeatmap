@@ -1,6 +1,11 @@
 import pytest
 
-from steamheatmap.pipeline import TrackedGame, fetch_tracked_games, run_pipeline
+from steamheatmap.pipeline import (
+    TrackedGame,
+    fetch_tracked_games,
+    run_pipeline,
+    select_app_ids_to_track,
+)
 
 
 class FakeSteamClient:
@@ -224,3 +229,9 @@ def test_pipeline_writes_the_baseline_row_averaged_across_tracked_games():
 
     baseline = writer.written_baselines[0]
     assert baseline.baseline_share == pytest.approx(0.3)
+
+
+def test_select_app_ids_to_track_includes_still_relevant_games_not_in_top_100():
+    tracked = select_app_ids_to_track(top_100_app_ids=[730, 570], still_relevant_app_ids=[440])
+
+    assert tracked == [730, 570, 440]
