@@ -151,6 +151,19 @@ def test_pipeline_scores_each_language_as_its_own_region():
     assert region_codes == {"english", "japanese"}
 
 
+def test_pipeline_writes_a_baseline_row_for_every_scored_region():
+    steam = FakeSteamClient(
+        totals={730: 200},
+        counts={(730, "english"): 100, (730, "japanese"): 60},
+    )
+    writer = FakeWriter()
+
+    run_pipeline(steam, writer, app_ids=[730], language_codes=["english", "japanese"])
+
+    region_codes = {baseline.region_code for baseline in writer.written_baselines}
+    assert region_codes == {"english", "japanese"}
+
+
 def test_pipeline_baseline_ignores_zero_review_games():
     # If the zero-review game wrongly counted as a 0% share, the baseline
     # would halve to 0.25 and 730's concentration would inflate to ≈1.62.
