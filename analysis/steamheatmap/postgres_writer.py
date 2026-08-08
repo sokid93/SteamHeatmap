@@ -18,12 +18,29 @@ class PostgresWriter:
     def upsert_game(self, app_id: int, name: str, most_played_rank: int) -> None:
         with psycopg2.connect(self._connection_string) as conn, conn.cursor() as cur:
             cur.execute(
-                """insert into games (app_id, name, most_played_rank)
-                   values (%s, %s, %s)
+                """insert into games (app_id, name, most_played_rank, last_relevant_at)
+                   values (%s, %s, %s, now())
                    on conflict (app_id) do update set
                        name = excluded.name,
-                       most_played_rank = excluded.most_played_rank""",
+                       most_played_rank = excluded.most_played_rank,
+                       last_relevant_at = excluded.last_relevant_at""",
                 (app_id, name, most_played_rank),
+            )
+
+    def still_relevant_app_ids(self, window_days: int) -> list[int]:
+        with psycopg2.connect(self._connection_string) as conn, conn.cursor() as cur:
+            cur.execute(
+                """select app_id from games
+                   where last_relevant_at >= now() - (%s || ' days')::interval""",
+                (window_days,),
+            )
+            return [row[0] for row in cur.fetchall()]
+
+    def clear_stale_ranks(self, current_top_100_app_ids: list[int]) -> None:
+        with psycopg2.connect(self._connection_string) as conn, conn.cursor() as cur:
+            cur.execute(
+                "update games set most_played_rank = null where not (app_id = any(%s))",
+                (current_top_100_app_ids,),
             )
 
     def upsert_region(self, region: Region) -> None:
@@ -66,3 +83,10 @@ class PostgresWriter:
                        values (%s, %s, %s)""",
                     (run_id, baseline.region_code, baseline.baseline_share),
                 )
+
+    def prune_old_runs(self, keep: int) -> None:
+        with psycopg2.connect(self._connection_string) as conn, conn.cursor() as cur:
+            stale_runs = "select id from runs order by id desc offset %s"
+            cur.execute(f"delete from region_scores where run_id in ({stale_runs})", (keep,))
+            cur.execute(f"delete from region_baselines where run_id in ({stale_runs})", (keep,))
+            cur.execute(f"delete from runs where id in ({stale_runs})", (keep,))

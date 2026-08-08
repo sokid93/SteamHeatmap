@@ -10,6 +10,10 @@ create table if not exists games (
 -- Deployed before most_played_rank existed; create-if-not-exists won't add it.
 alter table games add column if not exists most_played_rank integer;
 
+-- Bumped whenever a game appears in a real top-100 fetch or a user searches
+-- it (issue #27); games outside the freshness window drop out of tracking.
+alter table games add column if not exists last_relevant_at timestamptz;
+
 create table if not exists regions (
     code             text primary key,
     display_name     text not null,
