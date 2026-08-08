@@ -32,3 +32,13 @@ create table if not exists region_scores (
     concentration         double precision not null,
     primary key (run_id, app_id, region_code)
 );
+
+-- Persists what region_scores.concentration was computed against, so an
+-- on-demand-fetched game (issue #27) can be scored consistently with
+-- everyone else's colors without recomputing the full tracked-game baseline.
+create table if not exists region_baselines (
+    run_id         bigint not null references runs (id),
+    region_code    text   not null references regions (code),
+    baseline_share double precision not null,
+    primary key (run_id, region_code)
+);

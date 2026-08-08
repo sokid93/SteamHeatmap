@@ -1,6 +1,6 @@
 import psycopg2
 
-from steamheatmap.pipeline import RegionGameScore
+from steamheatmap.pipeline import RegionBaseline, RegionGameScore
 from steamheatmap.region_mapping import Region
 
 
@@ -38,7 +38,9 @@ class PostgresWriter:
                 (region.code, region.display_name, region.member_countries, region.blended),
             )
 
-    def write_region_scores(self, rows: list[RegionGameScore]) -> None:
+    def write_region_scores(
+        self, rows: list[RegionGameScore], baselines: list[RegionBaseline]
+    ) -> None:
         with psycopg2.connect(self._connection_string) as conn, conn.cursor() as cur:
             cur.execute("insert into runs default values returning id")
             run_id = cur.fetchone()[0]
@@ -57,4 +59,10 @@ class PostgresWriter:
                         row.wilson_adjusted_share,
                         row.concentration,
                     ),
+                )
+            for baseline in baselines:
+                cur.execute(
+                    """insert into region_baselines (run_id, region_code, baseline_share)
+                       values (%s, %s, %s)""",
+                    (run_id, baseline.region_code, baseline.baseline_share),
                 )
