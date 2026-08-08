@@ -29,3 +29,14 @@ def test_refresh_catalog_writes_every_app_from_steam():
         CatalogApp(app_id=730, name="Counter-Strike 2"),
         CatalogApp(app_id=570, name="Dota 2"),
     ]
+
+
+def test_refresh_catalog_returns_the_number_of_apps_written():
+    steam = FakeCatalogSteamClient(
+        apps=[CatalogApp(app_id=730, name="Counter-Strike 2"), CatalogApp(app_id=570, name="Dota 2")]
+    )
+    writer = FakeCatalogWriter()
+
+    count = refresh_catalog(steam, writer)
+
+    assert count == 2
