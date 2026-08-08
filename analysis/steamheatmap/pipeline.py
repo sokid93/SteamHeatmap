@@ -52,8 +52,16 @@ class RegionGameScore:
     concentration: float
 
 
+@dataclass(frozen=True)
+class RegionBaseline:
+    region_code: str
+    baseline_share: float
+
+
 class RegionScoreWriter(Protocol):
-    def write_region_scores(self, rows: list[RegionGameScore]) -> None: ...
+    def write_region_scores(
+        self, rows: list[RegionGameScore], baselines: list[RegionBaseline]
+    ) -> None: ...
 
 
 def run_pipeline(
@@ -75,6 +83,7 @@ def run_pipeline(
     }
 
     rows: list[RegionGameScore] = []
+    baselines: list[RegionBaseline] = []
     for lang in language_codes:
         region = region_for_language(lang)
         tracked = [
@@ -85,6 +94,7 @@ def run_pipeline(
             for app_id in reviewed_app_ids
         ]
         baseline = region_baseline_share(tracked)
+        baselines.append(RegionBaseline(region_code=region.code, baseline_share=baseline))
 
         for app_id in reviewed_app_ids:
             if counts[(app_id, lang)] < MIN_REVIEWS_TO_RANK:
@@ -104,4 +114,4 @@ def run_pipeline(
                 )
             )
 
-    writer.write_region_scores(rows)
+    writer.write_region_scores(rows, baselines)

@@ -34,9 +34,11 @@ class FakeSteamClient:
 class FakeWriter:
     def __init__(self):
         self.written_rows = []
+        self.written_baselines = []
 
-    def write_region_scores(self, rows) -> None:
+    def write_region_scores(self, rows, baselines) -> None:
         self.written_rows.extend(rows)
+        self.written_baselines.extend(baselines)
 
 
 def test_fetch_tracked_games_returns_app_id_and_name_from_steam():
@@ -107,6 +109,19 @@ def test_pipeline_scores_one_game_one_language_and_writes_result():
     assert row.wilson_adjusted_share == pytest.approx(0.4038, abs=0.0005)
     # Baseline across the (single-game) tracked set is 0.5; 0.4038 / 0.5
     assert row.concentration == pytest.approx(0.8077, abs=0.001)
+
+
+def test_pipeline_writes_a_baseline_row_for_the_scored_region():
+    steam = FakeSteamClient(totals={730: 100}, counts={(730, "english"): 50})
+    writer = FakeWriter()
+
+    run_pipeline(steam, writer, app_ids=[730], language_codes=["english"])
+
+    assert len(writer.written_baselines) == 1
+    baseline = writer.written_baselines[0]
+    assert baseline.region_code == "english"
+    # Baseline across the (single-game) tracked set is its own share, 0.5.
+    assert baseline.baseline_share == pytest.approx(0.5)
 
 
 def test_pipeline_writes_no_rows_for_a_game_with_zero_total_reviews():
