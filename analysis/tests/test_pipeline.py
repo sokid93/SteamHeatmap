@@ -235,3 +235,9 @@ def test_select_app_ids_to_track_includes_still_relevant_games_not_in_top_100():
     tracked = select_app_ids_to_track(top_100_app_ids=[730, 570], still_relevant_app_ids=[440])
 
     assert tracked == [730, 570, 440]
+
+
+def test_select_app_ids_to_track_does_not_duplicate_a_game_in_both_sets():
+    tracked = select_app_ids_to_track(top_100_app_ids=[730, 570], still_relevant_app_ids=[570, 440])
+
+    assert tracked == [730, 570, 440]
