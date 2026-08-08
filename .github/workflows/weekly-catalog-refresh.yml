@@ -1,0 +1,27 @@
+name: Weekly catalog refresh
+
+on:
+  schedule:
+    - cron: "0 6 * * 0" # weekly, Sunday 06:00 UTC
+  workflow_dispatch: {}
+
+jobs:
+  refresh-catalog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        working-directory: analysis
+        run: pip install -r requirements.txt
+
+      - name: Refresh Steam catalog cache
+        working-directory: analysis
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          # GetAppList is a public, keyless endpoint.
+        run: python refresh_catalog.py

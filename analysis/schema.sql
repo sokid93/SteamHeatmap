@@ -46,3 +46,11 @@ create table if not exists region_baselines (
     baseline_share double precision not null,
     primary key (run_id, region_code)
 );
+
+-- Every Steam app's id and name, refreshed weekly (issue #24) — full-catalog
+-- search reach beyond the tracked games above. Unrelated to review scoring:
+-- no foreign keys to games/regions/runs, its own refresh cadence.
+create table if not exists steam_apps (
+    app_id integer primary key,
+    name   text not null
+);

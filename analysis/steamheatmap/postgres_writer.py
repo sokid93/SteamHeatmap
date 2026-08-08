@@ -1,5 +1,7 @@
 import psycopg2
+from psycopg2.extras import execute_values
 
+from steamheatmap.catalog import CatalogApp
 from steamheatmap.pipeline import RegionBaseline, RegionGameScore
 from steamheatmap.region_mapping import Region
 
@@ -83,6 +85,16 @@ class PostgresWriter:
                        values (%s, %s, %s)""",
                     (run_id, baseline.region_code, baseline.baseline_share),
                 )
+
+    def write_catalog(self, apps: list[CatalogApp]) -> None:
+        # steam_apps is 100k+ rows, weekly — bulk upsert, not a per-row loop.
+        with psycopg2.connect(self._connection_string) as conn, conn.cursor() as cur:
+            execute_values(
+                cur,
+                """insert into steam_apps (app_id, name) values %s
+                   on conflict (app_id) do update set name = excluded.name""",
+                [(app.app_id, app.name) for app in apps],
+            )
 
     def prune_old_runs(self, keep: int) -> None:
         with psycopg2.connect(self._connection_string) as conn, conn.cursor() as cur:

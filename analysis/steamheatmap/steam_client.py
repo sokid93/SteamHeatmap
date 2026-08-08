@@ -2,9 +2,12 @@ import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
+from steamheatmap.catalog import CatalogApp
+
 _APPREVIEWS_URL = "https://store.steampowered.com/appreviews/{app_id}"
 _MOST_PLAYED_URL = "https://api.steampowered.com/ISteamChartsService/GetMostPlayedGames/v1/"
 _APPDETAILS_URL = "https://store.steampowered.com/api/appdetails"
+_APPLIST_URL = "https://api.steampowered.com/ISteamApps/GetAppList/v2/"
 
 # Steam occasionally answers a single call out of the day's ~3,100 with a
 # transient 5xx; without retries that one response kills the whole run.
@@ -56,3 +59,9 @@ class RequestsSteamClient:
         if not entry["success"]:
             return None
         return entry["data"]["name"]
+
+    def get_all_apps(self) -> list[CatalogApp]:
+        response = self._session.get(_APPLIST_URL, timeout=60)
+        response.raise_for_status()
+        apps = response.json()["applist"]["apps"]
+        return [CatalogApp(app_id=entry["appid"], name=entry["name"]) for entry in apps]
