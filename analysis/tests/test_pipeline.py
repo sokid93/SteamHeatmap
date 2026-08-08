@@ -209,3 +209,18 @@ def test_pipeline_baseline_spans_all_tracked_games():
     row_730 = next(row for row in writer.written_rows if row.app_id == 730)
     # Hand-computed: Wilson LB(50/100) ≈ 0.4038, baseline (0.5 + 0.1) / 2 = 0.3
     assert row_730.concentration == pytest.approx(0.4038 / 0.3, abs=0.005)
+
+
+def test_pipeline_writes_the_baseline_row_averaged_across_tracked_games():
+    # Same fixture as test_pipeline_baseline_spans_all_tracked_games: this
+    # pins the persisted baseline value itself, not just its use in scoring.
+    steam = FakeSteamClient(
+        totals={730: 100, 570: 100},
+        counts={(730, "english"): 50, (570, "english"): 10},
+    )
+    writer = FakeWriter()
+
+    run_pipeline(steam, writer, app_ids=[730, 570], language_codes=["english"])
+
+    baseline = writer.written_baselines[0]
+    assert baseline.baseline_share == pytest.approx(0.3)
