@@ -23,5 +23,7 @@ jobs:
         working-directory: analysis
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
-          # GetAppList is a public, keyless endpoint.
+          # The only Steam-calling job in this project that needs a key —
+          # IStoreService/GetAppList has no public alternative. ADR-012.
+          STEAM_API_KEY: ${{ secrets.STEAM_API_KEY }}
         run: python refresh_catalog.py

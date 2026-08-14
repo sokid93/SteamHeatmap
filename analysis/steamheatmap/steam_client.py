@@ -7,7 +7,11 @@ from steamheatmap.catalog import CatalogApp
 _APPREVIEWS_URL = "https://store.steampowered.com/appreviews/{app_id}"
 _MOST_PLAYED_URL = "https://api.steampowered.com/ISteamChartsService/GetMostPlayedGames/v1/"
 _APPDETAILS_URL = "https://store.steampowered.com/api/appdetails"
-_APPLIST_URL = "https://api.steampowered.com/ISteamApps/GetAppList/v2/"
+# ISteamApps/GetAppList/v2 (the old, keyless endpoint) no longer exists on
+# Steam's live API. IStoreService/GetAppList/v1 is the replacement, requires
+# a key, and is paginated (max 50,000 apps/page) rather than single-shot.
+_APPLIST_URL = "https://api.steampowered.com/IStoreService/GetAppList/v1/"
+_APPLIST_PAGE_SIZE = 50000
 
 # Steam occasionally answers a single call out of the day's ~3,100 with a
 # transient 5xx; without retries that one response kills the whole run.
@@ -21,9 +25,14 @@ _RETRIES = Retry(
 
 class RequestsSteamClient:
     """Real Steam Web API client. Untested by design (ADR-008) — the seam
-    faked in tests is the SteamClient protocol, not this implementation."""
+    faked in tests is the SteamClient protocol, not this implementation.
 
-    def __init__(self) -> None:
+    api_key is only required by get_all_apps() (IStoreService/GetAppList,
+    ADR-012's one keyed exception). The daily pipeline never passes one —
+    GetMostPlayedGames and appreviews stay public and keyless."""
+
+    def __init__(self, api_key: str | None = None) -> None:
+        self._api_key = api_key
         self._session = requests.Session()
         self._session.mount("https://", HTTPAdapter(max_retries=_RETRIES))
 
@@ -61,7 +70,27 @@ class RequestsSteamClient:
         return entry["data"]["name"]
 
     def get_all_apps(self) -> list[CatalogApp]:
-        response = self._session.get(_APPLIST_URL, timeout=60)
-        response.raise_for_status()
-        apps = response.json()["applist"]["apps"]
-        return [CatalogApp(app_id=entry["appid"], name=entry["name"]) for entry in apps]
+        if not self._api_key:
+            raise RuntimeError("get_all_apps() requires a Steam API key (STEAM_API_KEY)")
+
+        apps: list[CatalogApp] = []
+        last_appid = 0
+        while True:
+            response = self._session.get(
+                _APPLIST_URL,
+                params={
+                    "key": self._api_key,
+                    "max_results": _APPLIST_PAGE_SIZE,
+                    "last_appid": last_appid,
+                },
+                timeout=60,
+            )
+            response.raise_for_status()
+            page = response.json()["response"]
+            apps.extend(
+                CatalogApp(app_id=entry["appid"], name=entry["name"]) for entry in page["apps"]
+            )
+            if not page.get("have_more_results"):
+                break
+            last_appid = page["last_appid"]
+        return apps

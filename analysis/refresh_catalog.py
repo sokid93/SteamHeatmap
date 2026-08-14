@@ -1,7 +1,8 @@
 """Weekly catalog refresh entrypoint: cache every Steam app's id and name for
 full-catalog search reach, independent of the daily review-scoring pipeline.
 
-Requires SUPABASE_DB_URL in the environment. Run from analysis/:
+Requires SUPABASE_DB_URL and STEAM_API_KEY in the environment (the only job
+in this project that needs a Steam key — see ADR-012). Run from analysis/:
     .venv/Scripts/python.exe refresh_catalog.py
 """
 
@@ -20,10 +21,15 @@ def main() -> int:
         print("SUPABASE_DB_URL is not set", file=sys.stderr)
         return 1
 
+    api_key = os.environ.get("STEAM_API_KEY")
+    if not api_key:
+        print("STEAM_API_KEY is not set", file=sys.stderr)
+        return 1
+
     writer = PostgresWriter(connection_string)
     writer.apply_schema((Path(__file__).parent / "schema.sql").read_text())
 
-    steam = RequestsSteamClient()
+    steam = RequestsSteamClient(api_key=api_key)
     count = refresh_catalog(steam, writer)
     print(f"Cached {count} Steam apps.")
     return 0
