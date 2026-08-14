@@ -274,24 +274,30 @@ a {
   font-size: var(--text-caption);
 }
 
-/* #26: full-catalog matches beyond the embedded dataset. Informational
-   only — not yet selectable (#27) — so they read as inert, not clickable. */
+/* #26/#27: full-catalog matches beyond the embedded dataset. Clicking one
+   triggers a live fetch-and-score (#27) — same pointer/hover affordance as
+   an ordinary result, just muted to signal "not tracked yet". */
 .search-untracked-list {
   border-top: 1px solid var(--color-border-strong);
 }
 
 .search-untracked {
-  cursor: default;
   color: var(--color-text-muted);
-}
-
-.search-untracked:hover {
-  background: none;
 }
 
 .search-untracked-note {
   margin-left: var(--space-xs);
   font-size: var(--text-caption);
+}
+
+/* #27 in-flight/failed states. Loading isn't clickable (cursor says so);
+   an error stays clickable — clicking it again retries the fetch. */
+.search-untracked.search-loading {
+  cursor: default;
+}
+
+.search-untracked.search-error .search-untracked-note {
+  color: var(--color-error);
 }
 
 /* Hidden by visibility rather than display, so it can transition at all. The

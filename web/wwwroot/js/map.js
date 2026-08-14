@@ -145,9 +145,9 @@ function initRegionMap({
     // still-relevant searched games (ADR-014) — the full catalog lives
     // server-side in steam_apps (#24). Local matches render first and
     // instantly; this only supplements them once local coverage runs thin,
-    // and only with entries the local filter couldn't have found. Results
-    // are informational only at this stage (no data-app-id, so the existing
-    // click handler below already ignores them) — #27 makes them selectable.
+    // and only with entries the local filter couldn't have found. Selecting
+    // one triggers #27's live fetch-and-score below rather than an instant
+    // repaint, since there's no data for it yet.
     const CATALOG_SEARCH_DEBOUNCE_MS = 250;
     let catalogSearchTimer = null;
     let catalogSearchToken = 0;
@@ -160,10 +160,42 @@ function initRegionMap({
         const untracked = catalogEntries.filter(entry => !localIds.has(entry.appId));
         if (untracked.length === 0) return;
         const items = untracked
-            .map(entry => `<li class="search-untracked">${entry.name}` +
+            .map(entry => `<li class="search-untracked" data-app-id="${entry.appId}">${entry.name}` +
                 '<span class="search-untracked-note">not yet tracked</span></li>')
             .join("");
         searchResultsElement.insertAdjacentHTML("beforeend", `<ul class="search-untracked-list">${items}</ul>`);
+    }
+
+    // #27: makes a #26 untracked result actionable — a live, request-scoped
+    // fetch and score, persisted under the current run so every visitor sees
+    // it, not just the requester (ADR-006 amendment). The clicked <li> shows
+    // its own loading/error state so the rest of the dropdown stays usable.
+    function fetchAndSelectUntrackedGame(appId, itemElement) {
+        const name = itemElement.textContent.replace("not yet tracked", "").trim();
+        itemElement.className = "search-untracked search-loading";
+        itemElement.innerHTML = `${name}<span class="search-untracked-note">loading…</span>`;
+
+        fetch(`/Home/FetchGame?appId=${appId}`, { method: "POST" })
+            .then(response => response.ok ? response.json() : { hasEnoughReviews: false })
+            .then(result => {
+                if (!result.hasEnoughReviews) {
+                    showUntrackedError(itemElement, name, "Not enough reviews yet for a heatmap.");
+                    return;
+                }
+                const game = { appId: result.appId, name: result.name, mostPlayedRank: null };
+                gameById.set(game.appId, game);
+                games.push(game);
+                concentrationsByGame[game.appId] = result.concentrations;
+                selectGame(game);
+                searchInputElement.value = "";
+                searchResultsElement.innerHTML = "";
+            })
+            .catch(() => showUntrackedError(itemElement, name, "Something went wrong — try again."));
+    }
+
+    function showUntrackedError(itemElement, name, message) {
+        itemElement.className = "search-untracked search-error";
+        itemElement.innerHTML = `${name}<span class="search-untracked-note">${message}</span>`;
     }
 
     function scheduleCatalogSearch(query, localMatches) {
@@ -191,7 +223,15 @@ function initRegionMap({
     searchResultsElement.addEventListener("click", event => {
         const item = event.target.closest("li[data-app-id]");
         if (!item) return;
-        selectGame(gameById.get(Number(item.dataset.appId)));
+        const appId = Number(item.dataset.appId);
+
+        if (item.classList.contains("search-untracked")) {
+            if (item.classList.contains("search-loading")) return; // fetch already in flight
+            fetchAndSelectUntrackedGame(appId, item); // #27 — clicking an errored result retries
+            return;
+        }
+
+        selectGame(gameById.get(appId));
         searchInputElement.value = "";
         searchResultsElement.innerHTML = "";
     });
