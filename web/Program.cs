@@ -15,6 +15,10 @@ builder.Services.AddScoped<RegionMapViewModelBuilder>();
 builder.Services.AddSingleton<ICatalogSearchRepository>(
     new PostgresCatalogSearchRepository(PostgresConnectionString.FromUri(connectionString)));
 builder.Services.AddScoped<CatalogSearchViewModelBuilder>();
+builder.Services.AddSingleton<IOnDemandRepository>(
+    new PostgresOnDemandRepository(PostgresConnectionString.FromUri(connectionString)));
+builder.Services.AddHttpClient<IOnDemandSteamClient, HttpOnDemandSteamClient>();
+builder.Services.AddScoped<OnDemandGameFetcher>();
 
 var app = builder.Build();
 
