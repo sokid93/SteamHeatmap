@@ -138,6 +138,47 @@ function initRegionMap({
             ? noMatchHtml
             : `<ul>${matches.map(game =>
                 `<li data-app-id="${game.appId}">${game.name}</li>`).join("")}</ul>`;
+        scheduleCatalogSearch(searchInputElement.value.trim().toLowerCase(), matches);
+    }
+
+    // #26: the embedded dataset (above) only covers today's top-100 ∪
+    // still-relevant searched games (ADR-014) — the full catalog lives
+    // server-side in steam_apps (#24). Local matches render first and
+    // instantly; this only supplements them once local coverage runs thin,
+    // and only with entries the local filter couldn't have found. Results
+    // are informational only at this stage (no data-app-id, so the existing
+    // click handler below already ignores them) — #27 makes them selectable.
+    const CATALOG_SEARCH_DEBOUNCE_MS = 250;
+    let catalogSearchTimer = null;
+    let catalogSearchToken = 0;
+
+    function renderCatalogResults(query, localMatches, catalogEntries) {
+        // A slower response for a query the box no longer holds must not
+        // clobber what's rendered for what's typed now.
+        if (searchInputElement.value.trim().toLowerCase() !== query) return;
+        const localIds = new Set(localMatches.map(game => game.appId));
+        const untracked = catalogEntries.filter(entry => !localIds.has(entry.appId));
+        if (untracked.length === 0) return;
+        const items = untracked
+            .map(entry => `<li class="search-untracked">${entry.name}` +
+                '<span class="search-untracked-note">not yet tracked</span></li>')
+            .join("");
+        searchResultsElement.insertAdjacentHTML("beforeend", `<ul class="search-untracked-list">${items}</ul>`);
+    }
+
+    function scheduleCatalogSearch(query, localMatches) {
+        clearTimeout(catalogSearchTimer);
+        if (query === "" || localMatches.length >= MAX_SUGGESTIONS) return;
+        const requestToken = ++catalogSearchToken;
+        catalogSearchTimer = setTimeout(() => {
+            fetch(`/Home/SearchCatalog?q=${encodeURIComponent(query)}`)
+                .then(response => response.ok ? response.json() : [])
+                .then(entries => {
+                    if (requestToken !== catalogSearchToken) return; // superseded by a newer keystroke
+                    renderCatalogResults(query, localMatches, entries);
+                })
+                .catch(() => {}); // best-effort supplement; local matches already rendered
+        }, CATALOG_SEARCH_DEBOUNCE_MS);
     }
 
     searchInputElement.addEventListener("input", renderSuggestions);

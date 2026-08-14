@@ -274,6 +274,26 @@ a {
   font-size: var(--text-caption);
 }
 
+/* #26: full-catalog matches beyond the embedded dataset. Informational
+   only — not yet selectable (#27) — so they read as inert, not clickable. */
+.search-untracked-list {
+  border-top: 1px solid var(--color-border-strong);
+}
+
+.search-untracked {
+  cursor: default;
+  color: var(--color-text-muted);
+}
+
+.search-untracked:hover {
+  background: none;
+}
+
+.search-untracked-note {
+  margin-left: var(--space-xs);
+  font-size: var(--text-caption);
+}
+
 /* Hidden by visibility rather than display, so it can transition at all. The
    delayed visibility step drops the node out of the accessibility tree once
    the fade has finished rather than the instant it starts. */
