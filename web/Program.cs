@@ -12,6 +12,9 @@ var connectionString = builder.Configuration["SUPABASE_DB_URL"]
 builder.Services.AddSingleton<IRankingRepository>(
     new PostgresRankingRepository(PostgresConnectionString.FromUri(connectionString)));
 builder.Services.AddScoped<RegionMapViewModelBuilder>();
+builder.Services.AddSingleton<ICatalogSearchRepository>(
+    new PostgresCatalogSearchRepository(PostgresConnectionString.FromUri(connectionString)));
+builder.Services.AddScoped<CatalogSearchViewModelBuilder>();
 
 var app = builder.Build();
 
