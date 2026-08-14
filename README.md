@@ -2,10 +2,12 @@
 
 An interactive world map showing which Steam games are **disproportionately
 popular in each region** — not just globally popular. The map shows one game's
-concentration heatmap at a time (search any tracked game, or start from the
-current global #1); hover a region for an instant top-3 preview, or click to
-pin its full top ten, ranked by how much more concentrated that game's
-audience is there than the worldwide average.
+concentration heatmap at a time — search *any* Steam game, not just the
+currently-tracked top-100, or start from the current global #1; a game outside
+the daily-tracked set gets a live, on-demand fetch and score instead of a dead
+end. Hover a region for an instant top-3 preview, or click to pin its full top
+ten, ranked by how much more concentrated that game's audience is there than
+the worldwide average.
 
 **Live at [steamheatmap.azurewebsites.net](https://steamheatmap.azurewebsites.net)**
 (free-tier hosting — the first load after idle takes ~30 seconds).
@@ -58,12 +60,21 @@ Steam Web API ──▶ Python daily pipeline ──▶ Postgres (Supabase) ─�
 - **`analysis/`** — Python. Once a day (GitHub Actions): fetch the current
   top-100 most-played games, pull per-language review counts for all 30 Steam
   review languages (~3,100 keyless API calls, 3% of the rate cap), compute
-  Wilson-adjusted concentration scores per region, write to Postgres.
+  Wilson-adjusted concentration scores per region, write to Postgres. A
+  separate weekly job caches every Steam app's id and name (the one keyed
+  Steam call in the project) so full-catalog search has something to query.
 - **`web/`** — C# ASP.NET Core MVC. Reads the latest computed run from
-  Postgres — never calls Steam or Python. Server-rendered Razor + plain CSS;
-  D3.js scoped to the map widget, drawing self-hosted Natural Earth country
-  boundaries.
-- The two codebases share only the database and the top-level docs
+  Postgres for the map itself, and never calls Python directly. It does now
+  hold one narrow, request-scoped Steam-calling path of its own: searching a
+  game outside the daily-tracked set fires a live, parallelized fetch and
+  score against the same Wilson/concentration math the Python pipeline uses,
+  writes through the same schema, and repaints instantly — no page reload
+  ([ADR-006](adr/006-csharp-python-shared-database-integration.md)'s
+  amendment). Server-rendered Razor + plain CSS; D3.js scoped to the map
+  widget, drawing self-hosted Natural Earth country boundaries.
+- The two codebases share the database, the top-level docs, and — for this
+  one on-demand path — logic that's independently ported and tested on each
+  side rather than shared as a library
   ([ADR-006](adr/006-csharp-python-shared-database-integration.md)).
 - Hosting: Azure App Service (F1 free tier) for the web app, deployed by
   GitHub Actions on every push to `main` touching `web/`; Supabase free tier
@@ -94,7 +105,7 @@ per test, one commit per red→green→refactor cycle, decisions interviewed and
 recorded as ADRs, and end-to-end verification (live API runs, scripted
 headless-browser checks) before any issue closes. The git history is meant to
 be read — see **[docs/methodology.md](docs/methodology.md)** for the process
-and its chronological evolution, and **[adr/](adr/)** for the fifteen
+and its chronological evolution, and **[adr/](adr/)** for the sixteen
 architecture decision records behind the design.
 
 ## Disclosures
