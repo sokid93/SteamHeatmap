@@ -78,26 +78,24 @@ function initRegionMap({
             : "";
     }
 
-    // Bars are relative to the list they're rendered in (leader = 100% width),
-    // not the map's absolute [1/8, 8] domain — a runaway regional leader would
-    // otherwise crush every other bar into an invisible sliver. Log-scaled
-    // between that list's own weakest and strongest score, with a floor so
-    // even the last entry stays a visible bar rather than a hairline. Fill
-    // color reuses the map's own scale, so width answers "how it ranks here"
-    // while color answers "how it compares to the map" — the exact ×value
-    // lives in the title attribute, revealed on hover.
-    const MIN_BAR_PERCENT = 8;
+    // Bars share the map's own fixed [1/8, 8] domain (ADR-014) instead of
+    // stretching to each list's own leader/last-place — normalizing to the
+    // list always forced #1 to 100% and the last entry to the floor, which
+    // painted a big visual gap even when the real scores were nearly tied.
+    // On the shared domain, close scores render as close bars and a genuine
+    // blowout renders as a genuine gap; a region where the whole top 3 is
+    // strong shows three nearly-full bars, exactly like it should. Same
+    // clamp as the color scale, so the two move together: width says "how
+    // strong, on the map's own scale" and color says it again in a different
+    // channel — the exact ×value lives in the title attribute, on hover.
+    const MIN_BAR_PERCENT = 4;
+    const barWidth = d3.scaleLog()
+        .domain([1 / 8, 8])
+        .range([MIN_BAR_PERCENT, 100])
+        .clamp(true);
 
-    function barWidthPercent(rankedGames, concentration) {
-        const max = rankedGames[0].concentration;
-        const min = rankedGames[rankedGames.length - 1].concentration;
-        if (max === min) return 100;
-        const t = (Math.log(concentration) - Math.log(min)) / (Math.log(max) - Math.log(min));
-        return MIN_BAR_PERCENT + t * (100 - MIN_BAR_PERCENT);
-    }
-
-    function gameBarItemHtml(rankedGames, game, { linked = false } = {}) {
-        const width = barWidthPercent(rankedGames, game.concentration).toFixed(1);
+    function gameBarItemHtml(game, { linked = false } = {}) {
+        const width = barWidth(game.concentration).toFixed(1);
         const name = linked
             ? `<a href="${game.storeUrl}" target="_blank" rel="noopener">${game.name}</a>`
             : game.name;
@@ -110,7 +108,7 @@ function initRegionMap({
 
     function showPopup(region, event) {
         const topThree = region.games.slice(0, 3);
-        const items = topThree.map(game => gameBarItemHtml(topThree, game)).join("");
+        const items = topThree.map(game => gameBarItemHtml(game)).join("");
         popup
             .classed("visible", true)
             .html(
@@ -135,7 +133,7 @@ function initRegionMap({
 
     function showRegionInPanel(region) {
         const items = region.games
-            .map(game => gameBarItemHtml(region.games, game, { linked: true }))
+            .map(game => gameBarItemHtml(game, { linked: true }))
             .join("");
         panelElement.innerHTML =
             `<h2>${region.displayName}</h2>` +
