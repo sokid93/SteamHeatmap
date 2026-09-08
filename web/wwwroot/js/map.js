@@ -12,14 +12,15 @@ function initRegionMap({
     });
     const gameById = new Map(games.map(game => [game.appId, game]));
 
-    // ADR-014's encoding, ADR-015's colors: the ramp runs dark→light because it
-    // sits on a dark surface now, so magnitude still reads as "more ink". Single
-    // hue (11° spread), monotone lightness with every adjacent gap over the
-    // 0.06 OKLCH floor, low end at 2.01:1 against the surface — validated, not
-    // eyeballed. Still clamped to [1/8, 8]; ~2% of real scores fall outside.
+    // ADR-014's encoding ("darker = more popular here"), ADR-015's colors.
+    // Domain runs high→low so the darkest swatch lands on the highest
+    // concentration: single hue (11° spread), monotone lightness with every
+    // adjacent gap over the 0.06 OKLCH floor, lightest end at 2.01:1 against
+    // the surface — validated, not eyeballed. Still clamped to [1/8, 8]; ~2%
+    // of real scores fall outside.
     const rampBlues = ["#33587c", "#2f6ea6", "#2b86c9", "#439fe2", "#6fb8ef", "#9ed3f8", "#c9e9ff"];
     const color = d3.scaleSequentialLog(d3.interpolateRgbBasis(rampBlues))
-        .domain([1 / 8, 8])
+        .domain([8, 1 / 8])
         .clamp(true);
     // Both neutral, so neither can be mistaken for a low rung of the blue ramp:
     // a region with no signal is a different category, not a smaller number.
