@@ -78,15 +78,45 @@ function initRegionMap({
             : "";
     }
 
+    // Bars are relative to the list they're rendered in (leader = 100% width),
+    // not the map's absolute [1/8, 8] domain — a runaway regional leader would
+    // otherwise crush every other bar into an invisible sliver. Log-scaled
+    // between that list's own weakest and strongest score, with a floor so
+    // even the last entry stays a visible bar rather than a hairline. Fill
+    // color reuses the map's own scale, so width answers "how it ranks here"
+    // while color answers "how it compares to the map" — the exact ×value
+    // lives in the title attribute, revealed on hover.
+    const MIN_BAR_PERCENT = 8;
+
+    function barWidthPercent(rankedGames, concentration) {
+        const max = rankedGames[0].concentration;
+        const min = rankedGames[rankedGames.length - 1].concentration;
+        if (max === min) return 100;
+        const t = (Math.log(concentration) - Math.log(min)) / (Math.log(max) - Math.log(min));
+        return MIN_BAR_PERCENT + t * (100 - MIN_BAR_PERCENT);
+    }
+
+    function gameBarItemHtml(rankedGames, game, { linked = false } = {}) {
+        const width = barWidthPercent(rankedGames, game.concentration).toFixed(1);
+        const name = linked
+            ? `<a href="${game.storeUrl}" target="_blank" rel="noopener">${game.name}</a>`
+            : game.name;
+        return `<li title="×${game.concentration.toFixed(2)}">` +
+            `<span class="game-bar-name">${name}</span>` +
+            `<span class="game-bar-track"><span class="game-bar-fill" ` +
+            `style="width:${width}%;background:${color(game.concentration)}"></span></span>` +
+            `</li>`;
+    }
+
     function showPopup(region, event) {
-        const topThree = region.games.slice(0, 3).map(game =>
-            `<li>${game.name} <span class="concentration">×${game.concentration.toFixed(2)}</span></li>`);
+        const topThree = region.games.slice(0, 3);
+        const items = topThree.map(game => gameBarItemHtml(topThree, game)).join("");
         popup
             .classed("visible", true)
             .html(
                 `<h3>${region.displayName}</h3>` +
                 activeGameLine(region) +
-                `<ol>${topThree.join("")}</ol>` +
+                `<ol class="game-bar-list">${items}</ol>` +
                 blendedNote(region));
         movePopup(event);
     }
@@ -104,13 +134,13 @@ function initRegionMap({
     }
 
     function showRegionInPanel(region) {
-        const gameItems = region.games.map(game =>
-            `<li><a href="${game.storeUrl}" target="_blank" rel="noopener">${game.name}</a>` +
-            ` <span class="concentration">×${game.concentration.toFixed(2)}</span></li>`);
+        const items = region.games
+            .map(game => gameBarItemHtml(region.games, game, { linked: true }))
+            .join("");
         panelElement.innerHTML =
             `<h2>${region.displayName}</h2>` +
             blendedNote(region) +
-            `<ol>${gameItems.join("")}</ol>`;
+            `<ol class="game-bar-list">${items}</ol>`;
     }
 
     function showPanelHint() {

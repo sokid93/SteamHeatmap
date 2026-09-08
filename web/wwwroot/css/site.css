@@ -344,6 +344,43 @@ a {
   color: var(--color-text-muted);
 }
 
+/* Ranked game lists (popup top 3, panel top 10): width is log-scaled and
+   normalized to the leader of whichever list it's in (js computes it), color
+   reuses the map's own scale — so the two axes stay legible separately
+   instead of collapsing into one "bigger = redder" reading. The exact ×value
+   lives in the <li>'s title attribute, revealed on hover. */
+.game-bar-list {
+  margin: var(--space-2xs) 0;
+  padding-left: 1.25rem;
+}
+
+.game-bar-list li {
+  margin-bottom: var(--space-xs);
+}
+
+.game-bar-list li:last-child {
+  margin-bottom: 0;
+}
+
+.game-bar-name {
+  display: block;
+}
+
+.game-bar-track {
+  display: block;
+  height: 0.4rem;
+  margin-top: 0.15rem;
+  background: var(--color-divider);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.game-bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+}
+
 .popup-game-line {
   margin: 0 0 var(--space-2xs);
   font-weight: 600;
@@ -373,11 +410,6 @@ a {
 
 .region-panel-hint,
 .region-panel-blended {
-  color: var(--color-text-muted);
-  font-size: var(--text-caption);
-}
-
-#region-panel .concentration {
   color: var(--color-text-muted);
   font-size: var(--text-caption);
 }
