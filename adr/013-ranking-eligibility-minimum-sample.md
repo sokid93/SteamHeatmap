@@ -55,3 +55,38 @@ overwhelmingly review in English (the region's median concentration is 0.000).
   issue #10.
 - The threshold is a named constant in the pipeline, revisitable with evidence;
   post-threshold rankings now cleanly show whether Wilson needs retuning.
+
+## Amendment (2026-11-03): provisional — Steam no longer reports counts below 200
+
+Steam retired `store.steampowered.com/appreviews` in late September 2026 (it
+now redirects to the store homepage); the daily pipeline failed every day from
+2026-09-25 and the map froze on run 87 (2026-09-24). The keyless replacement,
+`IStoreBrowseService/GetItems` (ADR-012 amendment), changes the inputs this ADR
+reasons about in two ways, measured against run 87's stored counts:
+
+- **Counts are Steam's filtered review-score counts**, not `purchase_type=all`:
+  104 of 157 games came back *lower* after 40 days of growth (median ×0.91),
+  the biggest drops on key-reseller-heavy titles (Call of Duty ×0.55, Skyrim SE
+  ×0.59), so key activations are most likely excluded. The same filter applies
+  to both numerator and denominator, so shares barely move (median |Δshare|
+  0.0003); a small regional tilt remains (Hungarian −2.6%, Japanese +6%).
+- **A language's count is omitted below 200 reviews.** 757 of run 87's 3,916
+  ranked rows (all ≥50) had 50–199 reviews and would now have no count; small
+  languages lose half their ranked games or more (Indonesian 68%, Greek 59%).
+
+Decision, provisional until a source with exact sub-200 counts is found:
+
+- The 50-review threshold stays as written, but in practice nothing between
+  50 and 199 can be ranked: an unreported count is not ranked.
+- **An unreported count enters the baseline as a zero share**, in the spirit
+  of this ADR's "near-zero shares stay in the baseline". Measured on run 87:
+  zero-imputation lands baselines a median 14% low, excluding the unknown games
+  a median 14% high, but in small languages exclusion is far worse (Indonesian
+  +220% vs −60%, Bulgarian +167% vs −33%).
+- The web's on-demand path reads an unreported count as 0 inside its Steam
+  adapter: it computes no baseline, so the distinction has no effect there.
+
+Recomputing run 87's concentrations from GetItems' counts shifts them a median
+2–14% per language, and top-10 rankings overlap 8–10/10 in most languages
+(French 6/10). The comparison is confounded with 40 days of real drift, since
+the old endpoint cannot be queried any more.
