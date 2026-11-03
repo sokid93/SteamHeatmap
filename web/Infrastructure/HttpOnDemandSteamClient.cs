@@ -4,38 +4,67 @@ using SteamHeatmap.Web.Domain;
 namespace SteamHeatmap.Web.Infrastructure;
 
 // Real Steam Web API client for #27's request-scoped path. Untested by
-// design (ADR-008) — the seam faked in tests is IOnDemandSteamClient, not
+// design (ADR-008) â€” the seam faked in tests is IOnDemandSteamClient, not
 // this implementation. Same public, keyless endpoints as the daily
 // pipeline's RequestsSteamClient (analysis/), called concurrently rather
 // than once a day across ~100 games.
 public class HttpOnDemandSteamClient : IOnDemandSteamClient
 {
+    // store.steampowered.com/appreviews was retired in late September 2026
+    // (it now redirects to the store homepage); GetItems replaces it. See the
+    // ADR-013 amendment for how its counts differ.
+    private const string GetItemsUrl = "https://api.steampowered.com/IStoreBrowseService/GetItems/v1/";
+
     private readonly HttpClient _http;
 
     public HttpOnDemandSteamClient(HttpClient http) => _http = http;
 
-    public Task<int> GetTotalReviewCount(int appId) => QueryTotalReviews(appId, "all");
-
-    public Task<int> GetLanguageReviewCount(int appId, string languageCode) => QueryTotalReviews(appId, languageCode);
-
-    private async Task<int> QueryTotalReviews(int appId, string language)
+    public async Task<int> GetTotalReviewCount(int appId)
     {
-        var url = $"https://store.steampowered.com/appreviews/{appId}" +
-                   $"?json=1&language={language}&num_per_page=0&purchase_type=all";
-        using var response = await _http.GetAsync(url);
-        response.EnsureSuccessStatusCode();
-        using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
-        return document.RootElement.GetProperty("query_summary").GetProperty("total_reviews").GetInt32();
+        // The total is the same from any language's point of view.
+        var reviews = await GetReviews(appId, "english");
+        // An app Steam returns no reviews block for has no usable reviews.
+        if (reviews is null) return 0;
+        return reviews.Value.GetProperty("summary_filtered").GetProperty("review_count").GetInt32();
+    }
+
+    public async Task<int> GetLanguageReviewCount(int appId, string languageCode)
+    {
+        var reviews = await GetReviews(appId, languageCode);
+        // Steam omits a language's count below 200 reviews. That is below
+        // MinReviewsToRank either way, so it reads as zero here â€” unlike the
+        // daily pipeline, this path computes no baseline that could tell them apart.
+        if (reviews is null || !reviews.Value.TryGetProperty("summary_language_specific", out var specific))
+            return 0;
+        return specific.GetProperty("review_count").GetInt32();
+    }
+
+    private async Task<JsonElement?> GetReviews(int appId, string language)
+    {
+        var request = JsonSerializer.Serialize(new
+        {
+            ids = new[] { new { appid = appId } },
+            context = new { language, country_code = "US" },
+            data_request = new { include_reviews = true },
+        });
+        using var document = await GetJson($"{GetItemsUrl}?input_json={Uri.EscapeDataString(request)}");
+        var item = document.RootElement.GetProperty("response").GetProperty("store_items")[0];
+        // Clone: the element must outlive the document disposed on return.
+        return item.TryGetProperty("reviews", out var reviews) ? reviews.Clone() : null;
     }
 
     public async Task<string?> GetAppName(int appId)
     {
-        var url = $"https://store.steampowered.com/api/appdetails?appids={appId}&filters=basic";
-        using var response = await _http.GetAsync(url);
-        response.EnsureSuccessStatusCode();
-        using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        using var document = await GetJson($"https://store.steampowered.com/api/appdetails?appids={appId}&filters=basic");
         var entry = document.RootElement.GetProperty(appId.ToString());
         if (!entry.GetProperty("success").GetBoolean()) return null;
         return entry.GetProperty("data").GetProperty("name").GetString();
+    }
+
+    private async Task<JsonDocument> GetJson(string url)
+    {
+        using var response = await _http.GetAsync(url);
+        response.EnsureSuccessStatusCode();
+        return JsonDocument.Parse(await response.Content.ReadAsStringAsync());
     }
 }
