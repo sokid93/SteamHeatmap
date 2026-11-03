@@ -10,47 +10,41 @@ namespace SteamHeatmap.Web.Infrastructure;
 // than once a day across ~100 games.
 public class HttpOnDemandSteamClient : IOnDemandSteamClient
 {
-    // store.steampowered.com/appreviews was retired in late September 2026
-    // (it now redirects to the store homepage); GetItems replaces it. See the
-    // ADR-013 amendment for how its counts differ.
-    private const string GetItemsUrl = "https://api.steampowered.com/IStoreBrowseService/GetItems/v1/";
+    // Valve's documented replacement for the retired store.steampowered.com/
+    // appreviews: keyless, one app and one language per call, same counts.
+    private const string AppReviewsUrl = "https://api.steampowered.com/IUserReviewsService/GetAppReviews/v1/";
+
+    // Enum values: purchase_type 1 = all purchases (appreviews' purchase_type=all,
+    // so key activations count); review_type 0 = all, the only value for which
+    // query_summary carries total_reviews.
+    private const int PurchaseTypeAll = 1;
+    private const int ReviewTypeAll = 0;
 
     private readonly HttpClient _http;
 
     public HttpOnDemandSteamClient(HttpClient http) => _http = http;
 
-    public async Task<int> GetTotalReviewCount(int appId)
-    {
-        // The total is the same from any language's point of view.
-        var reviews = await GetReviews(appId, "english");
-        // An app Steam returns no reviews block for has no usable reviews.
-        if (reviews is null) return 0;
-        return reviews.Value.GetProperty("summary_filtered").GetProperty("review_count").GetInt32();
-    }
+    public Task<int> GetTotalReviewCount(int appId) => QueryTotalReviews(appId, "all");
 
-    public async Task<int> GetLanguageReviewCount(int appId, string languageCode)
-    {
-        var reviews = await GetReviews(appId, languageCode);
-        // Steam omits a language's count below 200 reviews. That is below
-        // MinReviewsToRank either way, so it reads as zero here — unlike the
-        // daily pipeline, this path computes no baseline that could tell them apart.
-        if (reviews is null || !reviews.Value.TryGetProperty("summary_language_specific", out var specific))
-            return 0;
-        return specific.GetProperty("review_count").GetInt32();
-    }
+    public Task<int> GetLanguageReviewCount(int appId, string languageCode) => QueryTotalReviews(appId, languageCode);
 
-    private async Task<JsonElement?> GetReviews(int appId, string language)
+    private async Task<int> QueryTotalReviews(int appId, string language)
     {
         var request = JsonSerializer.Serialize(new
         {
-            ids = new[] { new { appid = appId } },
-            context = new { language, country_code = "US" },
-            data_request = new { include_reviews = true },
+            appid = appId,
+            languages = new[] { language },
+            // Only the count is needed, but 0 means "default" (20 full reviews).
+            num_per_page = 1,
+            purchase_type = PurchaseTypeAll,
+            review_type = ReviewTypeAll,
         });
-        using var document = await GetJson($"{GetItemsUrl}?input_json={Uri.EscapeDataString(request)}");
-        var item = document.RootElement.GetProperty("response").GetProperty("store_items")[0];
-        // Clone: the element must outlive the document disposed on return.
-        return item.TryGetProperty("reviews", out var reviews) ? reviews.Clone() : null;
+        using var document = await GetJson($"{AppReviewsUrl}?input_json={Uri.EscapeDataString(request)}");
+        // Some apps (e.g. ones without a public store page) get an empty
+        // response: no usable reviews.
+        if (!document.RootElement.GetProperty("response").TryGetProperty("query_summary", out var summary))
+            return 0;
+        return summary.GetProperty("total_reviews").GetInt32();
     }
 
     public async Task<string?> GetAppName(int appId)
