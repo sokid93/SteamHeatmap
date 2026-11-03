@@ -65,6 +65,27 @@ public class HttpOnDemandSteamClient : IOnDemandSteamClient
     {
         using var response = await _http.GetAsync(url);
         response.EnsureSuccessStatusCode();
+        // A retired endpoint can still answer 200 — appreviews redirects to the
+        // store's HTML homepage — so a successful status alone proves nothing.
+        var mediaType = response.Content.Headers.ContentType?.MediaType;
+        if (mediaType is null || !mediaType.Contains("json"))
+            throw new UnexpectedSteamResponseException(url, response, mediaType);
         return JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+    }
+}
+
+// Steam answered successfully but not with JSON: the endpoint has most likely
+// been changed or retired.
+public class UnexpectedSteamResponseException(string url, HttpResponseMessage response, string? mediaType)
+    : Exception(
+        $"{url.Split('?')[0]} answered {(int)response.StatusCode} with {mediaType ?? "no content type"}" +
+        RedirectNote(url, response) +
+        " instead of JSON. Steam may have changed or retired this endpoint.")
+{
+    private static string RedirectNote(string url, HttpResponseMessage response)
+    {
+        var final = response.RequestMessage?.RequestUri;
+        if (final is null || final.GetLeftPart(UriPartial.Path) == url.Split('?')[0]) return "";
+        return $", after a redirect to {final.GetLeftPart(UriPartial.Path)}";
     }
 }
