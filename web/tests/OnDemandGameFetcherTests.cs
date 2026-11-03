@@ -68,7 +68,7 @@ public class OnDemandGameFetcherTests
     [Fact]
     public async Task MissingAppNameMeansNotEnoughReviews()
     {
-        // A delisted/removed app: appreviews may still answer, appdetails won't.
+        // A delisted/removed app: review counts may still answer, appdetails won't.
         var steam = new FakeOnDemandSteamClient { TotalReviews = 500, Name = null };
         var repository = new FakeOnDemandRepository((1, OneRegionBaseline));
         var fetcher = new OnDemandGameFetcher(steam, repository);
