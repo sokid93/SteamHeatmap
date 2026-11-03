@@ -1,10 +1,19 @@
+import json
+
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 from steamheatmap.catalog import CatalogApp
 
-_APPREVIEWS_URL = "https://store.steampowered.com/appreviews/{app_id}"
+# store.steampowered.com/appreviews was retired in late September 2026 (it
+# now redirects to the store homepage). GetItems replaces it: keyless, many
+# apps per request, one language per request. Its counts exclude what Steam
+# filters out of its review score (e.g. key activations), and it omits a
+# language's count below 200 reviews (ADR-013 amendment).
+_GETITEMS_URL = "https://api.steampowered.com/IStoreBrowseService/GetItems/v1/"
+# Ids travel in the query string; 50 per request keeps the URL short.
+_GETITEMS_BATCH_SIZE = 50
 _MOST_PLAYED_URL = "https://api.steampowered.com/ISteamChartsService/GetMostPlayedGames/v1/"
 _APPDETAILS_URL = "https://store.steampowered.com/api/appdetails"
 # ISteamApps/GetAppList/v2 (the old, keyless endpoint) no longer exists on
@@ -13,8 +22,8 @@ _APPDETAILS_URL = "https://store.steampowered.com/api/appdetails"
 _APPLIST_URL = "https://api.steampowered.com/IStoreService/GetAppList/v1/"
 _APPLIST_PAGE_SIZE = 50000
 
-# Steam occasionally answers a single call out of the day's ~3,100 with a
-# transient 5xx; without retries that one response kills the whole run.
+# Steam occasionally answers a single call out of the day's few hundred with
+# a transient 5xx; without retries that one response kills the whole run.
 _RETRIES = Retry(
     total=4,
     backoff_factor=2,
@@ -29,30 +38,46 @@ class RequestsSteamClient:
 
     api_key is only required by get_all_apps() (IStoreService/GetAppList,
     ADR-012's one keyed exception). The daily pipeline never passes one —
-    GetMostPlayedGames and appreviews stay public and keyless."""
+    GetMostPlayedGames, GetItems and appdetails stay public and keyless."""
 
     def __init__(self, api_key: str | None = None) -> None:
         self._api_key = api_key
         self._session = requests.Session()
         self._session.mount("https://", HTTPAdapter(max_retries=_RETRIES))
 
-    def _query_summary(self, app_id: int, language: str) -> dict:
-        response = self._session.get(
-            _APPREVIEWS_URL.format(app_id=app_id),
-            params={"json": 1, "language": language, "num_per_page": 0, "purchase_type": "all"},
-            timeout=30,
-        )
-        response.raise_for_status()
-        return response.json()["query_summary"]
+    def _review_summaries(self, app_ids: list[int], language: str) -> dict[int, dict]:
+        """GetItems' `reviews` block per app, as seen from `language`."""
+        summaries: dict[int, dict] = {}
+        for start in range(0, len(app_ids), _GETITEMS_BATCH_SIZE):
+            batch = app_ids[start : start + _GETITEMS_BATCH_SIZE]
+            request = {
+                "ids": [{"appid": app_id} for app_id in batch],
+                "context": {"language": language, "country_code": "US"},
+                "data_request": {"include_reviews": True},
+            }
+            response = self._session.get(
+                _GETITEMS_URL, params={"input_json": json.dumps(request)}, timeout=30
+            )
+            response.raise_for_status()
+            for item in response.json()["response"]["store_items"]:
+                summaries[item["id"]] = item.get("reviews", {})
+        return summaries
 
     def get_total_review_counts(self, app_ids: list[int]) -> dict[int, int]:
-        return {app_id: self._query_summary(app_id, "all")["total_reviews"] for app_id in app_ids}
+        # The total is the same from any language's point of view.
+        summaries = self._review_summaries(app_ids, "english")
+        # An app Steam returns no reviews block for has no usable reviews.
+        return {
+            app_id: summaries.get(app_id, {}).get("summary_filtered", {}).get("review_count", 0)
+            for app_id in app_ids
+        }
 
     def get_language_review_counts(
         self, app_ids: list[int], language_code: str
-    ) -> dict[int, int]:
+    ) -> dict[int, int | None]:
+        summaries = self._review_summaries(app_ids, language_code)
         return {
-            app_id: self._query_summary(app_id, language_code)["total_reviews"]
+            app_id: summaries.get(app_id, {}).get("summary_language_specific", {}).get("review_count")
             for app_id in app_ids
         }
 
