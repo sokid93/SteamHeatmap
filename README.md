@@ -59,7 +59,7 @@ Steam Web API ──▶ Python daily pipeline ──▶ Postgres (Supabase) ─�
 
 - **`analysis/`** — Python. Once a day (GitHub Actions): fetch the current
   top-100 most-played games, pull per-language review counts for all 30 Steam
-  review languages (~125 keyless, batched API calls), compute
+  review languages (~4,250 keyless API calls, 4% of the rate cap), compute
   Wilson-adjusted concentration scores per region, write to Postgres. A
   separate weekly job caches every Steam app's id and name (the one keyed
   Steam call in the project) so full-catalog search has something to query.
