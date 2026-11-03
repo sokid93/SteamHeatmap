@@ -1,4 +1,5 @@
 import json
+from urllib.parse import urlsplit
 
 import requests
 from requests.adapters import HTTPAdapter
@@ -32,6 +33,24 @@ _RETRIES = Retry(
 )
 
 
+class UnexpectedSteamResponse(RuntimeError):
+    """Steam answered successfully but not with JSON: the endpoint has most
+    likely been changed or retired."""
+
+    def __init__(self, url: str, response: requests.Response, content_type: str) -> None:
+        # Never echo response.url: it carries the query string, API key included.
+        final = urlsplit(response.url)
+        redirect = (
+            f", after a redirect to {final.scheme}://{final.netloc}{final.path}"
+            if response.history
+            else ""
+        )
+        super().__init__(
+            f"{url} answered {response.status_code} with {content_type or 'no content type'}"
+            f"{redirect} instead of JSON. Steam may have changed or retired this endpoint."
+        )
+
+
 class RequestsSteamClient:
     """Real Steam Web API client. Untested by design (ADR-008) — the seam
     faked in tests is the SteamClient protocol, not this implementation.
@@ -45,6 +64,16 @@ class RequestsSteamClient:
         self._session = requests.Session()
         self._session.mount("https://", HTTPAdapter(max_retries=_RETRIES))
 
+    def _get_json(self, url: str, params: dict | None = None, timeout: int = 30):
+        response = self._session.get(url, params=params, timeout=timeout)
+        response.raise_for_status()
+        # A retired endpoint can still answer 200 — appreviews redirects to the
+        # store's HTML homepage — so a successful status alone proves nothing.
+        content_type = response.headers.get("Content-Type", "")
+        if "json" not in content_type:
+            raise UnexpectedSteamResponse(url, response, content_type)
+        return response.json()
+
     def _review_summaries(self, app_ids: list[int], language: str) -> dict[int, dict]:
         """GetItems' `reviews` block per app, as seen from `language`."""
         summaries: dict[int, dict] = {}
@@ -55,11 +84,8 @@ class RequestsSteamClient:
                 "context": {"language": language, "country_code": "US"},
                 "data_request": {"include_reviews": True},
             }
-            response = self._session.get(
-                _GETITEMS_URL, params={"input_json": json.dumps(request)}, timeout=30
-            )
-            response.raise_for_status()
-            for item in response.json()["response"]["store_items"]:
+            page = self._get_json(_GETITEMS_URL, params={"input_json": json.dumps(request)})
+            for item in page["response"]["store_items"]:
                 summaries[item["id"]] = item.get("reviews", {})
         return summaries
 
@@ -82,19 +108,12 @@ class RequestsSteamClient:
         }
 
     def get_most_played_app_ids(self) -> list[int]:
-        response = self._session.get(_MOST_PLAYED_URL, timeout=30)
-        response.raise_for_status()
-        ranks = response.json()["response"]["ranks"]
+        ranks = self._get_json(_MOST_PLAYED_URL)["response"]["ranks"]
         return [entry["appid"] for entry in ranks]
 
     def get_app_name(self, app_id: int) -> str | None:
-        response = self._session.get(
-            _APPDETAILS_URL,
-            params={"appids": app_id, "filters": "basic"},
-            timeout=30,
-        )
-        response.raise_for_status()
-        entry = response.json()[str(app_id)]
+        details = self._get_json(_APPDETAILS_URL, params={"appids": app_id, "filters": "basic"})
+        entry = details[str(app_id)]
         if not entry["success"]:
             return None
         return entry["data"]["name"]
@@ -106,7 +125,7 @@ class RequestsSteamClient:
         apps: list[CatalogApp] = []
         last_appid = 0
         while True:
-            response = self._session.get(
+            page = self._get_json(
                 _APPLIST_URL,
                 params={
                     "key": self._api_key,
@@ -114,9 +133,7 @@ class RequestsSteamClient:
                     "last_appid": last_appid,
                 },
                 timeout=60,
-            )
-            response.raise_for_status()
-            page = response.json()["response"]
+            )["response"]
             apps.extend(
                 CatalogApp(app_id=entry["appid"], name=entry["name"]) for entry in page["apps"]
             )
