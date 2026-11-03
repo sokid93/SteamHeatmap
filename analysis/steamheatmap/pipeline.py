@@ -18,9 +18,10 @@ MIN_REVIEWS_TO_RANK = 50
 class SteamClient(Protocol):
     def get_total_review_counts(self, app_ids: list[int]) -> dict[int, int]: ...
 
+    # None means Steam doesn't report the count (it omits counts below 200).
     def get_language_review_counts(
         self, app_ids: list[int], language_code: str
-    ) -> dict[int, int]: ...
+    ) -> dict[int, int | None]: ...
 
     def get_most_played_app_ids(self) -> list[int]: ...
 
@@ -86,10 +87,12 @@ def run_pipeline(
     # 0/0), so it is left out of both scoring and the baseline.
     reviewed_app_ids = [app_id for app_id in app_ids if totals[app_id] > 0]
 
+    # An unreported count is treated as zero: below MIN_REVIEWS_TO_RANK it
+    # isn't ranked anyway, and ADR-013 keeps near-zero shares in the baseline.
     counts = {}
     for lang in language_codes:
         for app_id, count in steam.get_language_review_counts(reviewed_app_ids, lang).items():
-            counts[(app_id, lang)] = count
+            counts[(app_id, lang)] = count or 0
 
     rows: list[RegionGameScore] = []
     baselines: list[RegionBaseline] = []
