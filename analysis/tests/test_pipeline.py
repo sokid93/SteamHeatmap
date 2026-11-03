@@ -23,11 +23,13 @@ class FakeSteamClient:
         self._most_played = most_played or []
         self._names = names or {}
 
-    def get_total_review_count(self, app_id: int) -> int:
-        return self._totals[app_id]
+    def get_total_review_counts(self, app_ids: list[int]) -> dict[int, int]:
+        return {app_id: self._totals[app_id] for app_id in app_ids}
 
-    def get_language_review_count(self, app_id: int, language_code: str) -> int:
-        return self._counts[(app_id, language_code)]
+    def get_language_review_counts(
+        self, app_ids: list[int], language_code: str
+    ) -> dict[int, int]:
+        return {app_id: self._counts[(app_id, language_code)] for app_id in app_ids}
 
     def get_most_played_app_ids(self) -> list[int]:
         return self._most_played

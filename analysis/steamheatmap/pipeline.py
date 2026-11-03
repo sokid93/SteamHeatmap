@@ -16,9 +16,11 @@ MIN_REVIEWS_TO_RANK = 50
 
 
 class SteamClient(Protocol):
-    def get_total_review_count(self, app_id: int) -> int: ...
+    def get_total_review_counts(self, app_ids: list[int]) -> dict[int, int]: ...
 
-    def get_language_review_count(self, app_id: int, language_code: str) -> int: ...
+    def get_language_review_counts(
+        self, app_ids: list[int], language_code: str
+    ) -> dict[int, int]: ...
 
     def get_most_played_app_ids(self) -> list[int]: ...
 
@@ -78,17 +80,16 @@ def run_pipeline(
     app_ids: list[int],
     language_codes: list[str],
 ) -> None:
-    totals = {app_id: steam.get_total_review_count(app_id) for app_id in app_ids}
+    totals = steam.get_total_review_counts(app_ids)
 
     # A game with zero reviews carries no language signal (its share would be
     # 0/0), so it is left out of both scoring and the baseline.
     reviewed_app_ids = [app_id for app_id in app_ids if totals[app_id] > 0]
 
-    counts = {
-        (app_id, lang): steam.get_language_review_count(app_id, lang)
-        for app_id in reviewed_app_ids
-        for lang in language_codes
-    }
+    counts = {}
+    for lang in language_codes:
+        for app_id, count in steam.get_language_review_counts(reviewed_app_ids, lang).items():
+            counts[(app_id, lang)] = count
 
     rows: list[RegionGameScore] = []
     baselines: list[RegionBaseline] = []
