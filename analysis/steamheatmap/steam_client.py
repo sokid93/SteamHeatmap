@@ -95,7 +95,7 @@ class RequestsSteamClient:
 
     def get_language_review_counts(
         self, app_ids: list[int], language_code: str
-    ) -> dict[int, int | None]:
+    ) -> dict[int, int]:
         return {app_id: self._review_count(app_id, language_code) for app_id in app_ids}
 
     def get_most_played_app_ids(self) -> list[int]:

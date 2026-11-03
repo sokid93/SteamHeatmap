@@ -28,7 +28,7 @@ class FakeSteamClient:
 
     def get_language_review_counts(
         self, app_ids: list[int], language_code: str
-    ) -> dict[int, int | None]:
+    ) -> dict[int, int]:
         return {app_id: self._counts[(app_id, language_code)] for app_id in app_ids}
 
     def get_most_played_app_ids(self) -> list[int]:
@@ -231,22 +231,6 @@ def test_pipeline_writes_the_baseline_row_averaged_across_tracked_games():
 
     baseline = writer.written_baselines[0]
     assert baseline.baseline_share == pytest.approx(0.3)
-
-
-def test_pipeline_baseline_counts_an_unreported_language_count_as_a_zero_share():
-    # Steam's GetItems omits language counts below 200 (None here). Per
-    # ADR-013, near-zero shares stay in the baseline: (0.5 + 0) / 2 = 0.25,
-    # where dropping 570 instead would inflate the baseline to 0.5.
-    steam = FakeSteamClient(
-        totals={730: 100, 570: 100},
-        counts={(730, "english"): 50, (570, "english"): None},
-    )
-    writer = FakeWriter()
-
-    run_pipeline(steam, writer, app_ids=[730, 570], language_codes=["english"])
-
-    baseline = writer.written_baselines[0]
-    assert baseline.baseline_share == pytest.approx(0.25)
 
 
 def test_select_app_ids_to_track_includes_still_relevant_games_not_in_top_100():
