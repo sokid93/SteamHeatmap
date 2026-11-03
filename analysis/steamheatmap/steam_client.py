@@ -45,11 +45,16 @@ class RequestsSteamClient:
         response.raise_for_status()
         return response.json()["query_summary"]
 
-    def get_total_review_count(self, app_id: int) -> int:
-        return self._query_summary(app_id, "all")["total_reviews"]
+    def get_total_review_counts(self, app_ids: list[int]) -> dict[int, int]:
+        return {app_id: self._query_summary(app_id, "all")["total_reviews"] for app_id in app_ids}
 
-    def get_language_review_count(self, app_id: int, language_code: str) -> int:
-        return self._query_summary(app_id, language_code)["total_reviews"]
+    def get_language_review_counts(
+        self, app_ids: list[int], language_code: str
+    ) -> dict[int, int]:
+        return {
+            app_id: self._query_summary(app_id, language_code)["total_reviews"]
+            for app_id in app_ids
+        }
 
     def get_most_played_app_ids(self) -> list[int]:
         response = self._session.get(_MOST_PLAYED_URL, timeout=30)
