@@ -23,6 +23,6 @@ jobs:
         working-directory: analysis
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
-          # No Steam API key needed: both GetMostPlayedGames and appreviews
-          # are public, keyless endpoints.
+          # No Steam API key needed: GetMostPlayedGames, GetItems and
+          # appdetails are public, keyless endpoints.
         run: python run_daily.py

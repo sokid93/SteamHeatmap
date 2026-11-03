@@ -13,7 +13,7 @@ public record OnDemandFetchResult(bool HasEnoughReviews, string? GameName, IRead
 
 // #27's request-scoped Steam-calling seam (ADR-006 amendment), distinct from
 // the daily batch job's SteamClient protocol in analysis/ — same public
-// endpoints, parallel calls instead of ~3,100 sequential ones a day.
+// endpoints, one game's parallel calls instead of the daily job's batches.
 public interface IOnDemandSteamClient
 {
     Task<int> GetTotalReviewCount(int appId);
