@@ -90,3 +90,22 @@ Recomputing run 87's concentrations from GetItems' counts shifts them a median
 2–14% per language, and top-10 rankings overlap 8–10/10 in most languages
 (French 6/10). The comparison is confounded with 40 days of real drift, since
 the old endpoint cannot be queried any more.
+
+## Amendment (2026-11-03, later the same day): provisional rule withdrawn
+
+The source with exact sub-200 counts exists: Valve's documented successor to
+appreviews, `IUserReviewsService/GetAppReviews` (ADR-012 amendment). With
+`purchase_type` = all it reproduces run 87 — totals ×1.002–1.025 and sub-200
+in-language counts within a few reviews (TF2 Indonesian 120 → 124, Black Myth:
+Wukong Greek 101 → 104) after 40 days — so the methodology above applies again
+unchanged:
+
+- The 50-review threshold is the real floor again; nothing is unreported.
+- The baseline is built from real near-zero shares, not imputed zeros. The
+  "unreported counts as zero" code was reverted rather than kept as dead code.
+- Counts include key activations again, as in every run up to 87. Run 88 (the
+  only GetItems-based run) is the one exception in the history.
+
+The developer chose this over the faster GetItems path explicitly: the scores
+are fragile enough statistically that losing ~19% of the rankable rows, mostly
+in the smallest languages, was not an acceptable price for a shorter run.
