@@ -1,54 +1,54 @@
 # Steam Regional Popularity Heatmap
 
 An interactive world map showing which Steam games are **disproportionately
-popular in each region** — not just globally popular. The map shows one game's
-concentration heatmap at a time — search *any* Steam game, not just the
-currently-tracked top-100, or start from the current global #1; a game outside
-the daily-tracked set gets a live, on-demand fetch and score instead of a dead
-end. Hover a region for an instant top-3 preview, or click to pin its full top
-ten, ranked by how much more concentrated that game's audience is there than
+popular in each region**, not just globally popular. The map shows one game's
+concentration heatmap at a time. The default game is the top-1. You can also search 
+*any* Steam game beside the top-100 most popular game that are tracked every day.
+Hover a region for an instant top-3 preview, or click to pin its full top-10, 
+ranked by how much more concentrated that game's audience is there than
 the worldwide average.
 
 **Live at [steamheatmap.azurewebsites.net](https://steamheatmap.azurewebsites.net)**
-(free-tier hosting — the first load after idle takes ~30 seconds).
+(free-tier hosting, has a coldstart problem and takes a few extra seconds to load after idle).
 
 ![Map with the English-speaking region selected](docs/img/map.png)
 
 ## The problem
 
-Steam publishes no per-country or per-region player data — that exists only in
-Valve's private partner backend. Anyone curious whether a game is a phenomenon
-in Japan or Brazil specifically, rather than just big everywhere, has no tool
-to find out.
+Steam per-country or per-region player data is not public. Anyone curious 
+whether a game is a phenomenon in Japan or Brazil specifically, rather than 
+just big everywhere, has no tool to find out.
 
 ## The approach
 
 Every Steam review carries a language. A game's **review-language
 distribution** is public, fetchable per game, and a usable proxy for where its
-players are — with honest caveats, disclosed in the UI (some languages blend
-many countries; English reviews say little about any single anglophone
-country).
+players are, with some honest disclaimers: 
+-This language evaluation approach is a proxy to infer a game's popularity in 
+one region, it is not an acurate measure but an approximation.
+-Some languages blend many countries; English reviews for example say little
+about a single anglophone country.
 
 The interesting part is making the ranking trustworthy:
 
-- **Concentration, not volume** — a game ranks high in a region when its share
+- **Concentration, not volume**: a game ranks high in a region when its share
   of reviews in that region's language is far above the region's *baseline*
-  share across all tracked games. This surfaces regional favorites instead of
+  across all tracked games. This surfaces regional favorites instead of
   repeating the same global blockbusters on every continent.
-- **Wilson score lower bound** — raw shares from small samples are noisy, so
-  the ranking uses the Wilson interval's lower bound: a game with 8 of 12
-  reviews in Japanese scores far below one with 2,000 of 3,000, at the same
-  raw percentage.
-- **Ranking eligibility** — Wilson can't catch a *confidently tiny* share
-  divided by an even tinier baseline (9 Arabic reviews out of 111,974 once
-  scored ×16). A game therefore needs at least 50 reviews in a region's
-  language to be ranked there; a region with no eligible games renders as
-  "no data" rather than as noise
+- **Wilson score lower bound**: when we talk about percentages, small samples
+  are noisy, so the ranking uses the Wilson interval's lower bound. This
+  statistical method asserts that a game with 8 of 12 reviews in Japanese
+  scores far below one with 2,000 of 3,000.
+- **Ranking eligibility**: Wilson can't catch a tiny share divided by an even
+  tinier baseline (9 Arabic reviews out of 111,974 once scored very high).
+  A game therefore needs at least 50 reviews in a region's language to be
+  ranked there; a region with no eligible games renders as "no data" rather
+  than as noise
   ([ADR-013](adr/013-ranking-eligibility-minimum-sample.md)).
 
 The result on real data: Street Fighter 6 tops Japan at ×11 concentration
-while barely charting in Latin America — exactly the regional-taste signal raw
-review counts can't show.
+while barely charting in South America, which is exactly the regional signal 
+we want to measure.
 
 ## Architecture
 
