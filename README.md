@@ -34,7 +34,7 @@ The interesting part is making the ranking trustworthy:
 - **Concentration, not volume**: a game ranks high in a region when its share
   of reviews in that region's language is far above the region's *baseline*
   across all tracked games. This surfaces regional favorites instead of
-  repeating the same global blockbusters on every continent.
+  always showing the same global popular games on every continent.
 - **Wilson score lower bound**: when we talk about percentages, small samples
   are noisy, so the ranking uses the Wilson interval's lower bound. This
   statistical method asserts that a game with 8 of 12 reviews in Japanese
@@ -46,15 +46,25 @@ The interesting part is making the ranking trustworthy:
   than as noise
   ([ADR-013](adr/013-ranking-eligibility-minimum-sample.md)).
 
-The result on real data: Street Fighter 6 tops Japan at ×11 concentration
+The result on real data: Street Fighter 6 for example tops Japan at a very high concentration
 while barely charting in South America, which is exactly the regional signal 
 we want to measure.
 
 ## Architecture
 
-```
-Steam Web API ──▶ Python daily pipeline ──▶ Postgres (Supabase) ──▶ ASP.NET Core MVC + D3 map
-                  (GitHub Actions, cron)                            (reads latest run only)
+```mermaid
+flowchart LR
+    steam[Steam Web API]
+    python[Python daily pipeline<br/><i>GitHub Actions, scheduled</i>]
+    db[(PostgreSQL<br/>Supabase)]
+    web[ASP.NET Core MVC + D3 map<br/><i>reads latest run only</i>]
+    user((User))
+
+    steam --> python
+    python --> db
+    db --> web
+    user -- "Game search" --> web
+    web -. "On-demand fetch" .-> steam
 ```
 
 - **`analysis/`** — Python. Once a day (GitHub Actions): fetch the current
