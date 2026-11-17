@@ -52,7 +52,7 @@ we want to measure.
 
 ## Architecture
 
-![Diagrama de Arquitectura](docs/img/Steam Heatmap UML.png)
+![Diagrama de Arquitectura](docs/img/Steam_Heatmap_UML.png)
 
 - **`analysis/`** — Python. Once a day (GitHub Actions): fetch the current
   top-100 most-played games, pull per-language review counts for all 30 Steam
