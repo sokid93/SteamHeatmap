@@ -52,20 +52,7 @@ we want to measure.
 
 ## Architecture
 
-```mermaid
-flowchart LR
-    steam[Steam Web API]
-    python[Python daily pipeline<br/><i>GitHub Actions, scheduled</i>]
-    db[(PostgreSQL<br/>Supabase)]
-    web[ASP.NET Core MVC + D3 map<br/><i>reads latest run only</i>]
-    user((User))
-
-    steam --> python
-    python --> db
-    db --> web
-    user -- "Game search" --> web
-    web -. "On-demand fetch" .-> steam
-```
+![Diagrama de Arquitectura](docs/img/Steam Heatmap UML.png)
 
 - **`analysis/`** — Python. Once a day (GitHub Actions): fetch the current
   top-100 most-played games, pull per-language review counts for all 30 Steam
