@@ -24,6 +24,6 @@ jobs:
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
           # The only Steam-calling job in this project that needs a key —
-          # IStoreService/GetAppList has no public alternative. ADR-012.
+          # IStoreService/GetAppList has no public alternative. ADR-008.
           STEAM_API_KEY: ${{ secrets.STEAM_API_KEY }}
         run: python refresh_catalog.py

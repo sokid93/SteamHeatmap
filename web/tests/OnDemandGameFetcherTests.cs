@@ -83,7 +83,7 @@ public class OnDemandGameFetcherTests
     public async Task NoRegionReachesTheRankingThresholdMeansNotEnoughReviews()
     {
         var steam = new FakeOnDemandSteamClient { TotalReviews = 500 };
-        steam.LanguageCounts["japanese"] = 49; // ADR-013: 50 is the floor
+        steam.LanguageCounts["japanese"] = 49; // ADR-009: 50 is the floor
         var repository = new FakeOnDemandRepository((1, OneRegionBaseline));
         var fetcher = new OnDemandGameFetcher(steam, repository);
 

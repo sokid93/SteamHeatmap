@@ -13,16 +13,16 @@ from steamheatmap.postgres_writer import PostgresWriter
 from steamheatmap.region_mapping import region_for_language, supported_language_codes
 from steamheatmap.steam_client import RequestsSteamClient
 
-# ADR-005: track the current top ~100 by concurrent players.
+# RFC-001: track the current top ~100 by concurrent players.
 # Overridable for cheap smoke runs (TOP_N_GAMES=3 keeps it to ~100 API calls).
 DEFAULT_TOP_N_GAMES = 100
 
-# ADR-016: a searched game stays in daily rotation this many days since it
-# was last relevant (top-100 or searched), same spirit as ADR-013's
+# ADR-011: a searched game stays in daily rotation this many days since it
+# was last relevant (top-100 or searched), same spirit as ADR-009's
 # named, revisitable-with-evidence threshold.
 RELEVANCE_WINDOW_DAYS = 30
 
-# ADR-016: nothing reads any run but the latest; bounds storage growth.
+# ADR-011: nothing reads any run but the latest; bounds storage growth.
 RUNS_TO_KEEP = 3
 
 

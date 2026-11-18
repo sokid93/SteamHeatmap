@@ -188,7 +188,7 @@ def test_pipeline_baseline_ignores_zero_review_games():
 
 
 def test_pipeline_ranks_only_games_with_enough_in_language_reviews():
-    # ADR-013: 49 Japanese reviews is below the 50-review eligibility
+    # ADR-009: 49 Japanese reviews is below the 50-review eligibility
     # threshold, so 570 gets no Japanese row — however extreme its ratio.
     steam = FakeSteamClient(
         totals={730: 10000, 570: 100000},

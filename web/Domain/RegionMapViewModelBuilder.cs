@@ -19,7 +19,7 @@ public record RegionMapViewModel(
     IReadOnlyList<TrackedGameEntry> Games,
     IReadOnlyDictionary<int, IReadOnlyDictionary<string, double>> ConcentrationsByGame)
 {
-    /// <summary>The game whose heatmap the map shows on landing (ADR-014).</summary>
+    /// <summary>The game whose heatmap the map shows on landing (ADR-010).</summary>
     public int? FeaturedAppId => Games.Count == 0 ? null : Games[0].AppId;
 }
 

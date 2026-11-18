@@ -1,4 +1,4 @@
-# ADR-007: Start on free-tier hosting, plan a deliberate later migration to a VPS
+# RFC-002: Start on free-tier hosting, plan a deliberate later migration to a VPS
 
 ## Context
 Budget-conscious portfolio project; wants to see it actually deployed without committing money up front, but expects to eventually run it on paid infrastructure with fewer platform-specific quirks (e.g. self-hosted Jenkins, no cron/scheduling limitations).

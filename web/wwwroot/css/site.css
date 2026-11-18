@@ -1,4 +1,4 @@
-/* Self-hosted so the page makes no font-CDN request (ADR-010, ADR-015). Manrope
+/* Self-hosted so the page makes no font-CDN request (RFC-004, RFC-005). Manrope
    ships as a variable font, so one file covers the whole 400-700 range we use —
    two static files would mean two downloads for less. Latin subset only; game
    titles outside it fall back to the system stack, which is correct. */
@@ -13,7 +13,7 @@
     U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
-/* Design tokens (ADR-015). Every color and spacing value used more than once
+/* Design tokens (RFC-005). Every color and spacing value used more than once
    lives here, so the dark palette is a change to this block rather than a
    sweep through the file. */
 :root {
@@ -30,11 +30,11 @@
   --leading-normal: 1.55;
   --tracking-tight: -0.02em;
 
-  /* Exactly three interactions get motion (ADR-015): country hover, the popup,
+  /* Exactly three interactions get motion (RFC-005): country hover, the popup,
      and the search dropdown. Content swaps stay instant. */
   --motion: 130ms ease-out;
 
-  /* Dark only, no prefers-color-scheme branching (ADR-015). Steam's own
+  /* Dark only, no prefers-color-scheme branching (RFC-005). Steam's own
      navy/charcoal family, with contrast ratios measured against the surface
      each token is used on:
        text        on surface 10.1:1   on page 12.2:1
@@ -131,7 +131,7 @@ a {
 }
 
 /* The language-proxy caveat: always visible, but sized and colored to read as
-   a caption on the headline rather than as a warning banner (ADR-015). */
+   a caption on the headline rather than as a warning banner (RFC-005). */
 .map-caption {
   max-width: 48rem;
   margin: 0 0 var(--space-xl);
@@ -148,7 +148,7 @@ a {
 
 /* The map takes every rem the panel doesn't need. The svg is viewBox-sized with
    no fixed height, so width handed back here makes the map taller too.
-   This is also the page's only framed element (ADR-015): the region panel
+   This is also the page's only framed element (RFC-005): the region panel
    deliberately has no frame, so the map reads as the subject rather than as
    one of three peer boxes. */
 .map-surface {
@@ -178,7 +178,7 @@ a {
   width: 100%;
 }
 
-/* Static by design — no spinner (ADR-015). The aspect ratio mirrors the
+/* Static by design — no spinner (RFC-005). The aspect ratio mirrors the
    cropped map's, so the svg lands at the same height the placeholder held and
    nothing shifts. It is only a pre-load estimate: if the crop changes, the
    worst case is a pixel or two of movement, not a broken layout. */
@@ -421,7 +421,7 @@ a {
 
 /* Stroke only, deliberately not fill: hovering a country changes its outline,
    never its fill. Leaving fill out keeps the repaints that DO change it — a
-   game switch, entering selected mode — instant, which is what ADR-015 wants
+   game switch, entering selected mode — instant, which is what RFC-005 wants
    for content swaps. */
 .country {
   transition: stroke var(--motion), stroke-width var(--motion);

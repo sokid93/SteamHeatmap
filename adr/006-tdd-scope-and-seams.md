@@ -1,4 +1,4 @@
-# ADR-008: TDD scope limited to domain-level logic; single project with disciplined folder separation
+# ADR-006: TDD scope limited to domain-level logic; single project with disciplined folder separation
 
 ## Context
 The developer wants TDD as the working methodology but is not deeply experienced with mocking, and explicitly does not want a multi-project (Clean/Onion Architecture) C# solution structure, preferring to maintain decoupling through discipline rather than compiler-enforced project boundaries.

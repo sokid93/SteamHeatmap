@@ -38,7 +38,7 @@ public class HomeController : Controller
     }
 
     // #27: selecting an untracked search result. Live, request-scoped Steam
-    // calls (ADR-006 amendment) — POST because it writes region_scores/games,
+    // calls (ADR-005 amendment) — POST because it writes region_scores/games,
     // not idempotent-safe-to-cache like a GET search.
     [HttpPost]
     public async Task<IActionResult> FetchGame(int appId)

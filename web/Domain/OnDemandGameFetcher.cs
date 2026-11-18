@@ -11,7 +11,7 @@ public record OnDemandFetchResult(bool HasEnoughReviews, string? GameName, IRead
         new(true, gameName, scores);
 }
 
-// #27's request-scoped Steam-calling seam (ADR-006 amendment), distinct from
+// #27's request-scoped Steam-calling seam (ADR-005 amendment), distinct from
 // the daily batch job's SteamClient protocol in analysis/ — same public
 // endpoints, one game's parallel calls instead of the daily job's batches.
 public interface IOnDemandSteamClient
@@ -33,7 +33,7 @@ public interface IOnDemandRepository
 
 public class OnDemandGameFetcher
 {
-    // ADR-013, mirrors analysis/steamheatmap/pipeline.py's MIN_REVIEWS_TO_RANK.
+    // ADR-009, mirrors analysis/steamheatmap/pipeline.py's MIN_REVIEWS_TO_RANK.
     private const int MinReviewsToRank = 50;
 
     private readonly IOnDemandSteamClient _steam;
@@ -76,7 +76,7 @@ public class OnDemandGameFetcher
                 OnDemandScoring.ConcentrationScore(adjusted, baseline)));
         }
 
-        // A permanently-empty entry isn't worth a daily refetch (ADR-016) —
+        // A permanently-empty entry isn't worth a daily refetch (ADR-011) —
         // matches the daily pipeline excluding zero-in-language games too.
         if (scores.Count == 0) return OnDemandFetchResult.NotEnoughReviews();
 

@@ -1,4 +1,4 @@
-// Heatmap of one game at a time (ADR-014) with the region hover popup.
+// Heatmap of one game at a time (ADR-010) with the region hover popup.
 // All decisions (featured game, top lists, eligibility) arrive precomputed in
 // the view model; this file only paints. The view calls initRegionMap once.
 function initRegionMap({
@@ -12,7 +12,7 @@ function initRegionMap({
     });
     const gameById = new Map(games.map(game => [game.appId, game]));
 
-    // ADR-014's encoding ("darker = more popular here"), ADR-015's colors.
+    // ADR-010's encoding ("darker = more popular here"), RFC-005's colors.
     // Domain runs high→low so the darkest swatch lands on the highest
     // concentration: single hue (11° spread), monotone lightness with every
     // adjacent gap over the 0.06 OKLCH floor, lightest end at 2.01:1 against
@@ -78,7 +78,7 @@ function initRegionMap({
             : "";
     }
 
-    // Bars share the map's own fixed [1/8, 8] domain (ADR-014) instead of
+    // Bars share the map's own fixed [1/8, 8] domain (ADR-010) instead of
     // stretching to each list's own leader/last-place — normalizing to the
     // list always forced #1 to 100% and the last entry to the floor, which
     // painted a big visual gap even when the real scores were nearly tied.
@@ -147,7 +147,7 @@ function initRegionMap({
 
     showHeadline();
 
-    // ADR-014/#14: typeahead over the embedded game list, no server round trip.
+    // ADR-010/#14: typeahead over the embedded game list, no server round trip.
     const MAX_SUGGESTIONS = 10;
     const noMatchHtml =
         '<p class="search-no-match">Not tracked yet — we currently follow ' +
@@ -171,7 +171,7 @@ function initRegionMap({
     }
 
     // #26: the embedded dataset (above) only covers today's top-100 ∪
-    // still-relevant searched games (ADR-014) — the full catalog lives
+    // still-relevant searched games (ADR-010) — the full catalog lives
     // server-side in steam_apps (#24). Local matches render first and
     // instantly; this only supplements them once local coverage runs thin,
     // and only with entries the local filter couldn't have found. Selecting
@@ -197,7 +197,7 @@ function initRegionMap({
 
     // #27: makes a #26 untracked result actionable — a live, request-scoped
     // fetch and score, persisted under the current run so every visitor sees
-    // it, not just the requester (ADR-006 amendment). The clicked <li> shows
+    // it, not just the requester (ADR-005 amendment). The clicked <li> shows
     // its own loading/error state so the rest of the dropdown stays usable.
     function fetchAndSelectUntrackedGame(appId, itemElement) {
         const name = itemElement.textContent.replace("not yet tracked", "").trim();
@@ -270,7 +270,7 @@ function initRegionMap({
         // box, and fitting the rest of the world into a fixed 960x500 letterboxed
         // it besides. Drop AQ, then take the viewBox from the drawn land's own
         // bounds so the map fills its surface instead of padding itself with
-        // empty ocean. Every other no-data country still renders (ADR-014).
+        // empty ocean. Every other no-data country still renders (ADR-010).
         const land = {
             type: "FeatureCollection",
             features: world.features.filter(feature => feature.properties.iso_a2 !== "AQ"),
@@ -301,7 +301,7 @@ function initRegionMap({
 
         const regionOf = feature => regionByCountry.get(feature.properties.iso_a2);
 
-        // SELECTED MODE (ADR-014/#11): heatmap gone — the selected region is
+        // SELECTED MODE (ADR-010/#11): heatmap gone — the selected region is
         // highlighted, other tracked regions go white, no-data stays gray.
         function fillFor(feature) {
             const region = regionOf(feature);

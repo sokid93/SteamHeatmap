@@ -10,7 +10,7 @@ from steamheatmap.scoring import (
 )
 
 
-# ADR-013: below this many in-language reviews a game is not ranked in the
+# ADR-009: below this many in-language reviews a game is not ranked in the
 # region (its share still feeds the region baseline).
 MIN_REVIEWS_TO_RANK = 50
 

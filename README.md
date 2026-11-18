@@ -44,7 +44,7 @@ The interesting part is making the ranking trustworthy:
   A game therefore needs at least 50 reviews in a region's language to be
   ranked there; a region with no eligible games renders as "no data" rather
   than as noise
-  ([ADR-013](adr/013-ranking-eligibility-minimum-sample.md)).
+  ([ADR-009](adr/009-ranking-eligibility-minimum-sample.md)).
 
 The result on real data: Street Fighter 6 for example tops Japan at a very high concentration
 while barely charting in South America, which is exactly the regional signal 

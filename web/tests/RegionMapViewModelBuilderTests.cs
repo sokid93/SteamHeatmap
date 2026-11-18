@@ -179,7 +179,7 @@ public class RegionMapViewModelBuilderTests
     [Fact]
     public async Task ConcentrationLookupIsNotTruncatedToTheRegionPanelTopTen()
     {
-        // ADR-014: a missing lookup entry renders white ("no signal"), so the
+        // ADR-010: a missing lookup entry renders white ("no signal"), so the
         // lookup must carry every eligible score, not the panel's top 10.
         var elevenGames = Enumerable.Range(1, 11)
             .Select(i => EnglishScore(appId: i, gameName: $"Game {i}", concentration: i))
