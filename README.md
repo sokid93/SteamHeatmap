@@ -54,28 +54,23 @@ we want to measure.
 
 ![Diagrama de Arquitectura](docs/Steam_Heatmap_UML.png)
 
-- **`analysis/`** — Python. Once a day (GitHub Actions): fetch the current
+- Python daily pipeline, once a day (GitHub Actions): fetch the current
   top-100 most-played games, pull per-language review counts for all 30 Steam
-  review languages (~4,250 keyless API calls, 4% of the rate cap), compute
-  Wilson-adjusted concentration scores per region, write to Postgres. A
-  separate weekly job caches every Steam app's id and name (the one keyed
-  Steam call in the project) so full-catalog search has something to query.
-- **`web/`** — C# ASP.NET Core MVC. Reads the latest computed run from
-  Postgres for the map itself, and never calls Python directly. It does now
-  hold one narrow, request-scoped Steam-calling path of its own: searching a
-  game outside the daily-tracked set fires a live, parallelized fetch and
-  score against the same Wilson/concentration math the Python pipeline uses,
-  writes through the same schema, and repaints instantly — no page reload
-  ([ADR-006](adr/006-csharp-python-shared-database-integration.md)'s
-  amendment). Server-rendered Razor + plain CSS; D3.js scoped to the map
-  widget, drawing self-hosted Natural Earth country boundaries.
-- The two codebases share the database, the top-level docs, and — for this
-  one on-demand path — logic that's independently ported and tested on each
-  side rather than shared as a library
-  ([ADR-006](adr/006-csharp-python-shared-database-integration.md)).
+  review languages, compute Wilson-adjusted concentration scores per region,
+  write to Postgres. A separate weekly job caches every Steam app's id and name
+  so full-catalog search has something to query.
+- ASP.NET + D3 map: reads the latest computed run from Postgres to draw the map
+  itself, and never calls Python directly. It does now hold one narrow Steam-calling
+  path of its own: searching a game outside the daily-tracked set fires a live fetch
+  and score against the same concentration math the Python pipeline uses, writes through
+  the same schema, and repaints instantly with no page reload. Rendered with Razor + plain
+  CSS; D3.js scoped to the map widget, drawing self-hosted country boundaries.
+- The two codebases share the database, the top-level docs, and, for the
+  on-demand path, logic that's independently ported and tested on each
+  side rather than shared as a library for the moment.
 - Hosting: Azure App Service (F1 free tier) for the web app, deployed by
   GitHub Actions on every push to `main` touching `web/`; Supabase free tier
-  for Postgres ([ADR-007](adr/007-hosting-free-tier-then-vps.md)).
+  for Postgres.
 
 ## Running locally
 
@@ -101,9 +96,8 @@ The engineering process is part of the product: strict TDD with one behavior
 per test, one commit per red→green→refactor cycle, decisions interviewed and
 recorded as ADRs, and end-to-end verification (live API runs, scripted
 headless-browser checks) before any issue closes. The git history is meant to
-be read — see **[docs/methodology.md](docs/methodology.md)** for the process
-and its chronological evolution, and **[adr/](adr/)** for the sixteen
-architecture decision records behind the design.
+be read (see **[docs/methodology.md](docs/methodology.md)** for the process
+and its chronological evolution).
 
 ## Disclosures
 
