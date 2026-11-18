@@ -1,4 +1,4 @@
-# RFC-004: Server-rendered Razor + plain CSS + D3.js, not a SPA framework
+# RFC-003: Server-rendered Razor + plain CSS + D3.js, not a SPA framework
 
 ## Context
 Developer have a strong opinion about using libraries and frameworks before they are proven useful, which initially raised concern about frontend libraries generally, but was not focused on useful single-purpose libraries. Wants "cool, smooth" visuals eventually, as this project is intended as a portfolio centerpiece.

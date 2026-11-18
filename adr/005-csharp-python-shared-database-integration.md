@@ -13,5 +13,5 @@ Python runs as an independent, scheduled batch process (GitHub Actions cron) tha
 - Python as a small internal HTTP API called by C#: overkill for batch/offline processing; would only make sense for on-demand/live analysis, which is not the MVP shape.
 
 ## Consequences
-- Two independent codebases/dependency ecosystems/test suites (xUnit for C#, pytest for Python) in one monorepo (ADR-007).
+- Two independent codebases/dependency ecosystems/test suites (xUnit for C#, pytest for Python) in one monorepo (ADR-008).
 - Schema changes must be coordinated manually between the two sides (no shared ORM/type system linking them) — acceptable at this scale.

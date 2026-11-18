@@ -1,4 +1,4 @@
-# RFC-003: C# / ASP.NET Core MVC as the primary web stack
+# ADR-007: C# / ASP.NET Core MVC as the primary web stack
 
 ## Context
 Developer's background is C#/.NET (strongest), with working familiarity in Python and Java. Coming from game development, new to web development specifically. Wants MVC architecture and TDD.
