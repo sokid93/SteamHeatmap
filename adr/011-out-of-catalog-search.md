@@ -35,4 +35,5 @@ This grill-me (2026-08-08) works out that shape end-to-end, under two framing co
 - Closes RFC-001's deferred "search-box feature... explicitly out of scope for MVP."
 - Revisits, but doesn't reverse, ADR-010's zero-round-trip decision: the top-100 embed stays, augmented by still-relevant searched games; a live endpoint now exists, but only pays for the genuinely-new-search case — exactly the trigger ADR-010 named for revisiting it.
 - `games.most_played_rank` semantics change: `NULL` now means "not currently top-100" (the game may still be tracked via `last_relevant_at`), not "never was top-100."
+- The catalog refresh only upserts: a renamed app gets its new name, but an app that drops out of Steam's list stays in `steam_apps` and stays searchable. Not decided either way yet — it was simply never addressed.
 - New schema: `steam_apps`, `region_baselines`, `games.last_relevant_at`. New GitHub Actions workflow: `weekly-catalog-refresh.yml`. New C#-side Steam-calling code (previously Python-only).
