@@ -2,7 +2,7 @@ namespace SteamHeatmap.Web.Domain;
 
 // Bit-for-bit port of analysis/steamheatmap/scoring.py's wilson_lower_bound
 // and concentration_score (issue #27). Deliberately duplicated rather than
-// shared across the C#/Python boundary — ADR-006 keeps the two runtimes
+// shared across the C#/Python boundary — ADR-005 keeps the two runtimes
 // independent — but the formulas and constant must stay identical, or a
 // game scored on-demand would land on a different color than one scored by
 // the daily pipeline for the same inputs. Covered by the same golden test

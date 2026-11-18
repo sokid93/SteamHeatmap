@@ -4,7 +4,7 @@ using SteamHeatmap.Web.Domain;
 namespace SteamHeatmap.Web.Infrastructure;
 
 // Real Steam Web API client for #27's request-scoped path. Untested by
-// design (ADR-008) — the seam faked in tests is IOnDemandSteamClient, not
+// design (ADR-006) — the seam faked in tests is IOnDemandSteamClient, not
 // this implementation. Same public, keyless endpoints as the daily
 // pipeline's RequestsSteamClient (analysis/), called concurrently rather
 // than once a day across ~100 games.

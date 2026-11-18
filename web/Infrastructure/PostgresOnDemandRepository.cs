@@ -3,7 +3,7 @@ using SteamHeatmap.Web.Domain;
 
 namespace SteamHeatmap.Web.Infrastructure;
 
-// Untested by design (ADR-008) — the seam faked in tests is
+// Untested by design (ADR-006) — the seam faked in tests is
 // IOnDemandRepository, not this implementation.
 public class PostgresOnDemandRepository : IOnDemandRepository
 {

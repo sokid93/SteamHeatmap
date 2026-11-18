@@ -53,11 +53,11 @@ class UnexpectedSteamResponse(RuntimeError):
 
 
 class RequestsSteamClient:
-    """Real Steam Web API client. Untested by design (ADR-008) — the seam
+    """Real Steam Web API client. Untested by design (ADR-006) — the seam
     faked in tests is the SteamClient protocol, not this implementation.
 
     api_key is only required by get_all_apps() (IStoreService/GetAppList,
-    ADR-012's one keyed exception). The daily pipeline never passes one —
+    ADR-008's one keyed exception). The daily pipeline never passes one —
     GetMostPlayedGames, GetAppReviews and appdetails stay public and keyless."""
 
     def __init__(self, api_key: str | None = None) -> None:

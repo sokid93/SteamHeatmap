@@ -2,7 +2,7 @@
 full-catalog search reach, independent of the daily review-scoring pipeline.
 
 Requires SUPABASE_DB_URL and STEAM_API_KEY in the environment (the only job
-in this project that needs a Steam key — see ADR-012). Run from analysis/:
+in this project that needs a Steam key — see ADR-008). Run from analysis/:
     .venv/Scripts/python.exe refresh_catalog.py
 """
 

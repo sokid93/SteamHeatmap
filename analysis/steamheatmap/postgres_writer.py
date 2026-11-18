@@ -7,7 +7,7 @@ from steamheatmap.region_mapping import Region
 
 
 class PostgresWriter:
-    """Supabase/Postgres writer. Untested by design (ADR-008) — the seam
+    """Supabase/Postgres writer. Untested by design (ADR-006) — the seam
     faked in tests is the RegionScoreWriter protocol, not this class."""
 
     def __init__(self, connection_string: str):

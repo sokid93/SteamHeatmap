@@ -1,4 +1,4 @@
-# ADR-005: MVP tracks a fixed top-N "currently most played" list, not the full catalog
+# RFC-001: MVP tracks a fixed top-N "currently most played" list, not the full catalog
 
 ## Context
 Steam has 100k+ listed apps. Pulling per-language review data for the entire catalog daily is neither realistic nor necessary for the product goal.
