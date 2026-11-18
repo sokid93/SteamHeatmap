@@ -61,7 +61,7 @@ overwhelmingly review in English (the region's median concentration is 0.000).
 Steam retired `store.steampowered.com/appreviews` in late September 2026 (it
 now redirects to the store homepage); the daily pipeline failed every day from
 2026-09-25 and the map froze on run 87 (2026-09-24). The keyless replacement,
-`IStoreBrowseService/GetItems` (ADR-008 amendment), changes the inputs this ADR
+`IStoreBrowseService/GetItems` (see `docs/steam-web-api.md`), changes the inputs this ADR
 reasons about in two ways, measured against run 87's stored counts:
 
 - **Counts are Steam's filtered review-score counts**, not `purchase_type=all`:
@@ -94,7 +94,7 @@ the old endpoint cannot be queried any more.
 ## Amendment (2026-11-03, later the same day): provisional rule withdrawn
 
 The source with exact sub-200 counts exists: Valve's documented successor to
-appreviews, `IUserReviewsService/GetAppReviews` (ADR-008 amendment). With
+appreviews, `IUserReviewsService/GetAppReviews` (see `docs/steam-web-api.md`). With
 `purchase_type` = all it reproduces run 87 — totals ×1.002–1.025 and sub-200
 in-language counts within a few reviews (TF2 Indonesian 120 → 124, Black Myth:
 Wukong Greek 101 → 104) after 40 days — so the methodology above applies again

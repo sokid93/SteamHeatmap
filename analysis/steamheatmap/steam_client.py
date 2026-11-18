@@ -57,7 +57,7 @@ class RequestsSteamClient:
     faked in tests is the SteamClient protocol, not this implementation.
 
     api_key is only required by get_all_apps() (IStoreService/GetAppList,
-    ADR-008's one keyed exception). The daily pipeline never passes one —
+    the one keyed exception in docs/steam-web-api.md). The daily pipeline never passes one —
     GetMostPlayedGames, GetAppReviews and appdetails stay public and keyless."""
 
     def __init__(self, api_key: str | None = None) -> None:

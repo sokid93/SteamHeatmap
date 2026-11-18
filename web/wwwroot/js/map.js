@@ -12,7 +12,7 @@ function initRegionMap({
     });
     const gameById = new Map(games.map(game => [game.appId, game]));
 
-    // ADR-010's encoding ("darker = more popular here"), RFC-005's colors.
+    // ADR-010's encoding ("darker = more popular here"), RFC-004's colors.
     // Domain runs high→low so the darkest swatch lands on the highest
     // concentration: single hue (11° spread), monotone lightness with every
     // adjacent gap over the 0.06 OKLCH floor, lightest end at 2.01:1 against
