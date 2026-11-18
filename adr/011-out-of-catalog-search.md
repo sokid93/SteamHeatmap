@@ -7,7 +7,7 @@ This grill-me (2026-08-08) works out that shape end-to-end, under two framing co
 
 ## Decision
 
-1. **Catalog typeahead source**: a new `steam_apps (app_id, name)` table, refreshed weekly (Sundays) by a new GitHub Actions workflow (`weekly-catalog-refresh.yml`) calling Steam's `ISteamApps/GetAppList` once and upserting. Kept independent of the daily pipeline — it's cheap, changes rarely, and a bad catalog refresh shouldn't block the daily scoring run or vice versa.
+1. **Catalog typeahead source**: a new `steam_apps (app_id, name)` table, refreshed weekly (Sundays) by a new GitHub Actions workflow (`weekly-catalog-refresh.yml`) fetching Steam's app list and upserting it. The endpoint is `IStoreService/GetAppList`, which needs a Steam Web API key and returns the list in pages of up to 50,000 apps (games only by default), so one refresh is a few paged requests. This ADR originally named `ISteamApps/GetAppList`, the keyless single-shot endpoint, which turned out to be retired when #24 was verified live; see ADR-008's 2026-08-14 amendment. Kept independent of the daily pipeline — it's cheap, changes rarely, and a bad catalog refresh shouldn't block the daily scoring run or vice versa.
 
 2. **Search stays two-tier, preserving ADR-010's zero-round-trip fast path**: the existing instant client-side filter over the embedded dataset (top-100 ∪ still-relevant searched games, see #4) remains the first thing shown while typing. A debounced server call to a new catalog-search endpoint (querying `steam_apps`) fires only when the local match set is thin. A result that's already tracked — found via either path — renders instantly client-side; the network is only paid for genuinely untracked games.
 
