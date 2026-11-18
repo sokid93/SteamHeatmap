@@ -27,7 +27,9 @@ Read this file in full at the start of any session touching this project. Read i
 
 ## Current status
 
-As of 2026-11-03 — MVP fully working end to end, redesigned map, visual pass shipped, out-of-catalog search shipped. **All issues closed** (#1 and its full tree, including #22's sub-issues).
+As of 2026-11-18 — MVP fully working end to end, redesigned map, visual pass shipped, out-of-catalog search shipped. **All issues closed** (#1 and its full tree, including #22's sub-issues).
+
+- **Decision records split, 2026-11-18**: the sixteen ADRs became eleven ADRs (`adr/`, renumbered 001–011 without gaps) and five RFCs (`rfc/`, RFC-001–005: top-N scope, hosting, primary stack, frontend stack, homepage styling) — pragmatic choices expected to be revisited rather than fixed architecture. Every reference in docs and code comments was rewritten. Commits, issues and PRs from before this date use the old numbers; `adr/README.md` has the mapping.
 
 - **Steam review-source outage, 2026-09-25 → 2026-11-03**: Valve retired `store.steampowered.com/appreviews` (redirects to the store homepage); every daily run failed and the map froze on run 87 (2026-09-24). Fixed the same day in two steps: PR #28 moved to `GetItems` (run 88 and the scheduled run 89 — filtered counts, nothing below 200 reviews, a provisional ADR-009 rule), then the follow-up PR moved both clients to Valve's documented successor `IUserReviewsService/GetAppReviews`, restoring exact counts and withdrawing the provisional rule (run 90: 3,344 rows, 134 games, minimum 50 in-language reviews; ~18 min per run). Both Steam clients now fail with a named `UnexpectedSteamResponse` error when an endpoint stops answering JSON. Open: a review-count run takes ~4,250 keyless calls; the developer chose exact data over speed and may revisit runtime later.
 
