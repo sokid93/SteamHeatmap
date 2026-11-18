@@ -94,7 +94,7 @@ dotnet test tests/SteamHeatmap.Web.Tests.csproj    # from web/
 
 The engineering process is part of the product: strict TDD with one behavior
 per test, one commit per red→green→refactor cycle, decisions interviewed and
-recorded as ADRs, and end-to-end verification (live API runs, scripted
+recorded as ADRs or RFCs, and end-to-end verification (live API runs, scripted
 headless-browser checks) before any issue closes. The git history is meant to
 be read (see **[docs/methodology.md](docs/methodology.md)** for the process
 and its chronological evolution).

@@ -14,4 +14,4 @@ Budget-conscious portfolio project; wants to see it actually deployed without co
 - Self-hosted Jenkins/TeamCity now: would require a persistent server just to host the CI tool, contradicting the free-tier-first decision.
 
 ## Consequences
-- A deliberate migration to a VPS (with Docker and possibly self-hosted Jenkins) is an explicitly planned future step, not an afterthought — worth its own future ADR when it happens.
+- A deliberate migration to a VPS (with Docker and possibly self-hosted Jenkins) is an explicitly planned future step, not an afterthought — worth its own future RFC when it happens.

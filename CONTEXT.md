@@ -2,7 +2,7 @@
 
 A web app showing, per country/region, which Steam games are most disproportionately popular there — using review-language distribution as a proxy for geography, since Steam has no public per-country data.
 
-Read this file in full at the start of any session touching this project. Read individual ADRs in `adr/` only when working in the area they concern. Follow the development process in `docs/methodology.md` — strict TDD cycles, one commit per cycle, push per feature.
+Read this file in full at the start of any session touching this project. Read individual ADRs in `adr/` (architecture decisions) and RFCs in `rfc/` (provisional, revisitable choices) only when working in the area they concern. Follow the development process in `docs/methodology.md` — strict TDD cycles, one commit per cycle, push per feature.
 
 ## Domain vocabulary
 
