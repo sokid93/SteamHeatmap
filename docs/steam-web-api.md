@@ -1,4 +1,6 @@
-# ADR-008: Steam Web API usage mechanics and terms-of-use compliance
+# Steam Web API: usage mechanics and terms of use
+
+Reference notes on how this project calls Steam and what Valve's terms require. Endpoints change under us, so each change is added as a dated update below; a later update supersedes the findings above it.
 
 ## Context
 Needed to confirm the daily pipeline's API usage is technically sound and compliant with Valve's Steam Web API Terms of Use before committing to the design.
@@ -8,21 +10,21 @@ Needed to confirm the daily pipeline's API usage is technically sound and compli
 - Per-game daily fetch: 1 call (`appreviews`, `language=all`, `num_per_page=0`) for the total review count, plus 1 call per language code (also `num_per_page=0`) to get that language's `total_reviews` from `query_summary` — no pagination needed since we only need counts, not review text. ~29 calls/game/day.
 - At ~100 tracked games, that's ~2,900 calls/day — well under the 100k/day cap. No throttling infrastructure required for MVP scale.
 
-## Decision
+## Rules this project follows
 - Store the Steam Web API key only as a GitHub Actions secret (never committed to the repo), consistent with the existing CI/CD and secrets approach.
 - Include a visible "data powered by Steam, not affiliated with Valve" disclosure in the UI (same convention as SteamCharts), satisfying the non-affiliation clause of the terms of use.
 
 ## Consequences
 - No rate-limiting/backoff logic is required for MVP scale, though it would be a reasonable addition if the tracked game count grows substantially later.
 
-## Amendment (2026-08-14): one keyed exception — the catalog job
-Discovered while building issue #24 (weekly Steam catalog cache, ADR-011): `ISteamApps/GetAppList/v2`, the endpoint the daily pipeline had (correctly, per the 2026-07-10 finding) assumed stayed keyless for everything, no longer exists on Steam's live API. Its replacement, `IStoreService/GetAppList/v1`, requires the `key=` param this ADR's original decision already anticipated storing.
+## Update (2026-08-14): one keyed exception — the catalog job
+Discovered while building issue #24 (weekly Steam catalog cache, ADR-011): `ISteamApps/GetAppList/v2`, the endpoint the daily pipeline had (correctly, per the 2026-07-10 finding) assumed stayed keyless for everything, no longer exists on Steam's live API. Its replacement, `IStoreService/GetAppList/v1`, requires the `key=` param this document's original rules already anticipated storing.
 
-- **Scope**: only `RequestsSteamClient.get_all_apps()`, called solely from `refresh_catalog.py` (the weekly catalog job), takes an `api_key`. `GetMostPlayedGames` and the review-count endpoint — everything the daily pipeline and the live web app use — remain public and keyless, unchanged. (The review-count endpoint was `appreviews` when this was written; since the 2026-11-03 amendments below it is `IUserReviewsService/GetAppReviews`, still keyless.)
+- **Scope**: only `RequestsSteamClient.get_all_apps()`, called solely from `refresh_catalog.py` (the weekly catalog job), takes an `api_key`. `GetMostPlayedGames` and the review-count endpoint — everything the daily pipeline and the live web app use — remain public and keyless, unchanged. (The review-count endpoint was `appreviews` when this was written; since the 2026-11-03 updates below it is `IUserReviewsService/GetAppReviews`, still keyless.)
 - **Mechanics confirmed live 2026-08-14**: `IStoreService/GetAppList` is paginated (up to 50,000 apps/page via `max_results`, cursor via `last_appid`/`have_more_results`), unlike the old single-shot response. Response shape is `{"response": {"apps": [{"appid", "name", ...}], "have_more_results", "last_appid"}}`, not the old `{"applist": {"apps": [...]}}`. Default filters return games only (no DLC/software/videos/hardware) — a behavior change from the old endpoint's unfiltered dump, and a better fit for #24/#26's game-search use case, not just an incidental side effect.
-- **Storage**: `STEAM_API_KEY` stored as a GitHub Actions secret (consistent with this ADR's original decision) and as a local user env var for manual runs; passed only to `weekly-catalog-refresh.yml`'s job env, never to the daily pipeline workflow.
+- **Storage**: `STEAM_API_KEY` stored as a GitHub Actions secret (consistent with this document's original rules) and as a local user env var for manual runs; passed only to `weekly-catalog-refresh.yml`'s job env, never to the daily pipeline workflow.
 
-## Amendment (2026-11-03): review counts come from GetItems, appreviews is retired
+## Update (2026-11-03): review counts come from GetItems, appreviews is retired
 `store.steampowered.com/appreviews` has answered every request with a 302 to the store homepage since late September 2026 (verified for all parameter, user-agent and cookie variants, from GitHub's runners and a home connection alike).
 
 - **Replacement, still keyless**: `IStoreBrowseService/GetItems/v1`, called with `input_json={"ids": [{"appid": …}, …], "context": {"language": <Steam language code>, "country_code": "US"}, "data_request": {"include_reviews": true}}`. Each item's `reviews.summary_filtered.review_count` is the total (identical in every language context) and `reviews.summary_language_specific.review_count` the in-language count — omitted below 200 reviews. An app can come back with no `reviews` block at all; it is treated as having no reviews.
@@ -30,7 +32,7 @@ Discovered while building issue #24 (weekly Steam catalog cache, ADR-011): `ISte
 - **What the counts mean** changed too (Steam's filtered review-score counts, not `purchase_type=all`); that and the sub-200 omission are scoring questions, recorded in the ADR-009 amendment.
 - **Every Steam response is now checked for a JSON content type** in both clients: a retired endpoint can still end in a 200 (appreviews' redirect lands on an HTML page), which previously surfaced only as an opaque JSON decode error.
 
-## Amendment (2026-11-03, later the same day): GetAppReviews replaces GetItems for review counts
+## Update (2026-11-03, later the same day): GetAppReviews replaces GetItems for review counts
 Valve announced appreviews' retirement on 2026-10-02 (official shutdown 2026-10-22, though our calls were already redirected from ~2026-09-28) and documented a successor: `IUserReviewsService/GetAppReviews/v1` (partner.steamgames.com/doc/webapi/IUserReviewsService, section "Migrating from /appreviews"). It supersedes the GetItems mechanics above for review counts.
 
 - **Call**: `input_json={"appid": …, "languages": [<code> or "all"], "num_per_page": 1, "purchase_type": 1, "review_type": 0}` → `response.query_summary.total_reviews`. Parameters are enums now: `purchase_type` 1 = all purchases (the old `purchase_type=all`), `review_type` 0 = all — the only value for which `query_summary` carries totals. `num_per_page: 0` no longer means "counts only": it falls back to the default 20 full reviews, so 1 is the cheapest request. All 30 pipeline language codes are accepted as-is.
