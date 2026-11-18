@@ -4,7 +4,7 @@
 The project doubles as a portfolio piece; the developer wants it presentable as one unified, coherent project rather than scattered across repos.
 
 ## Decision
-One Git repository, with the C# app and Python job living side-by-side (e.g. `/web` and `/analysis`), sharing one set of top-level documentation (`CONTEXT.md`, ADRs, RFCs, README) despite being otherwise independent codebases connected only through the shared database (ADR-005).
+One Git repository, with the C# app and Python job living side-by-side (e.g. `/web` and `/analysis`), sharing one set of top-level documentation (`CLAUDE.md` working context, `CONTEXT.md` glossary, ADRs, RFCs, README) despite being otherwise independent codebases connected only through the shared database (ADR-005).
 
 ## Alternatives rejected
 - Two separate repositories, connected only via the shared DB schema as an implicit contract: stricter separation, but fragments documentation and the portfolio narrative across two places.
